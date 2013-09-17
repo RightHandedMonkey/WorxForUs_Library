@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import org.apache.http.StatusLine;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,8 +81,7 @@ public class Utils {
 	public static String convert_datetime_to_str(java.util.Date d) {
 		if (d == null)
 			return "";
-		DateFormat dateFormat = new SimpleDateFormat(
-				Utils.MYSQL_DATETIME_FORMAT);
+		DateFormat dateFormat = new SimpleDateFormat(Utils.MYSQL_DATETIME_FORMAT);
 		// set to eastern time zone
 		dateFormat.setTimeZone(TimeZone.getTimeZone(MYSQL_TIMEZONE));
 		// return (new
@@ -88,6 +89,23 @@ public class Utils {
 		return dateFormat.format(d);
 	}
 
+    public static Result getJSONObject(String string) {
+    	Result result = new Result();
+    	
+    	JSONObject response = new JSONObject();
+        try {
+            // Drill into the JSON response to find the content body
+            response = new JSONObject(string);
+            result.object = response;
+        } catch (Exception e) {
+            result.success = false;
+            result.error = "Problem parsing website response: "+e;
+            Log.d("com.cxworx.Utils", "JSON Parsing error: "+e);
+        }
+        return result;
+    }
+
+    
 	public static boolean is_debug_mode(Context context) {
 
 		boolean result = false;

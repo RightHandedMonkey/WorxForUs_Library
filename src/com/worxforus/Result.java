@@ -37,16 +37,23 @@ public class Result {
 				+ this.last_insert_index;
 	}
 
-	public void add_results_if_error(Result result_tmp, String msg) {
-		if (result_tmp != null) {
-			if (!(result_tmp.success) && msg != null) {
+	/**
+	 * This function is used to chain results together.  For example: if you are performing multiple operations
+	 * that could have failures, then create one result object and use this function to populate it with a summary
+	 * of all failures that occur (all operations must pass to return success).
+	 * @param result_to_include - New operation to include for success consideration
+	 * @param fail_msg - message to add if failure detected
+	 */
+	public void add_results_if_error(Result result_to_include, String fail_msg) {
+		if (result_to_include != null) {
+			if (!(result_to_include.success) && fail_msg != null) {
 				// add these to return results
-				if (msg.length() > 0)
-					msg = "\r\n";
+				if (fail_msg.length() > 0)
+					fail_msg += "\r\n";
 				this.success = false;
-				this.error += msg + result_tmp.error;
-				this.message += result_tmp.message;
-				this.sql += result_tmp.sql;
+				this.error += fail_msg + result_to_include.error;
+				this.message += result_to_include.message;
+				this.sql += result_to_include.sql;
 			}
 		}
 	}
