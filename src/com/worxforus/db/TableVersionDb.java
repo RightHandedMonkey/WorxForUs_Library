@@ -21,13 +21,9 @@ public class TableVersionDb extends TableInterface {
 	//and we want to control version of individual tables.
 	//User needs to call verify tables from the TableManager instead.
 
-	
 	public String database_name;
 	
-//	public static final String DATABASE_NAME = com.cxworx.Utils.DATABASE_NAME;
 	public static final String DATABASE_TABLE = "table_meta_data";
-	//db retry - in case waiting for db to be open
-	protected int num_times_to_open = 0;
 
 	//table fields
 	static int i=0;
@@ -42,6 +38,7 @@ public class TableVersionDb extends TableInterface {
 	KEY_TABLE_VERSION+"    		INTEGER NOT NULL"+
 	")";
 
+	
 	private SQLiteDatabase db;
 	//holds the app using the db
 	private TableVersionDbHelper dbHelper;
@@ -125,6 +122,7 @@ public class TableVersionDb extends TableInterface {
 		}
 		return r;
 	}
+	
 	
 	public Cursor getTableVersionsCursor() {
 		return db.query(DATABASE_TABLE, 

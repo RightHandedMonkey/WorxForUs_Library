@@ -8,7 +8,7 @@ public abstract class TableInterface {
 	//TableManager.verifyTable(TableClass);
 	public static final int DATABASE_VERSION = 1; //to use in SQLiteOpenHelper - this is not used for migrations
 
-	protected volatile boolean table_checked=false;
+	protected volatile boolean table_checked=false; //Used as a flag by the TableManager so table is only checked once per app instace
 	public abstract Result openDb();
 	public abstract void closeDb();
 

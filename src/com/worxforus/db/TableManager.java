@@ -1,6 +1,7 @@
 package com.worxforus.db;
 
 import com.worxforus.Result;
+import com.worxforus.SyncEntry;
 
 import junit.framework.Assert;
 
@@ -25,6 +26,7 @@ public class TableManager {
 	//This table is special because all database tables store there versions here - this is checked first
 	//But we don't want to check itself against itself - so load it before all other dbs
 	private TableVersionDb tableVersionDb; 
+	private TableSyncDb tableSyncDb;
 	
 	private TableManager() {
 	}
@@ -40,12 +42,20 @@ public class TableManager {
 		return self().connHelper;
 	}
 	
-	public static TableVersionDb getTableVersionDB(Context appContext, String dbName) {
+	protected static TableVersionDb getTableVersionDB(Context appContext, String dbName) {
 		Assert.assertNotNull(appContext);
 		if (self().tableVersionDb == null) {
 			self().tableVersionDb = new TableVersionDb(appContext, dbName);
 		}
 		return self().tableVersionDb;
+	}
+	
+	protected static TableSyncDb getTableSyncDB(Context appContext, String dbName) {
+		Assert.assertNotNull(appContext);
+		if (self().tableSyncDb == null) {
+			self().tableSyncDb = new TableSyncDb(appContext, dbName);
+		}
+		return self().tableSyncDb;
 	}
 
 	public static Result acquireConnection(Context appContext, String dbName, TableInterface table) {
@@ -125,30 +135,31 @@ public class TableManager {
 		return version;
 	}
 	
-	/*
-	protected static void verifyTable(Object db) {
-		Assert.assertTrue(db instanceof BaseDBInterface);
-		if (!((BaseDBInterface) db).isTableVerified()) { //check that table hasn't already been verified
-			if (!((BaseDBInterface) db).check_if_table_exists()) { //make sure table exists
-				((BaseDBInterface) db).create_database(); //create table if not
-				//store table version in meta table
-				modify_table_version(((BaseDBInterface) db).get_table_name(), ((BaseDBInterface) db).get_table_code_version());
-			} else {
-				int db_version = get_table_version(((BaseDBInterface) db).get_table_name());
-				if (need_table_upgrade(((BaseDBInterface) db).get_table_name(), db_version, ((BaseDBInterface) db).get_table_code_version()) ) {
-					//table needs update, so update it
-					((BaseDBInterface) db).update_database(db_version);
-					//store table version in meta table
-					modify_table_version(((BaseDBInterface) db).get_table_name(), ((BaseDBInterface) db).get_table_code_version());
-				}
-			}
-			//mark as updated
-			((BaseDBInterface) db).setTableVerified();
-		} 
-	}
-	*/
-	//===========================--------------------> Connection Manager Helper <-----------------====================\\
 
+	//===========================--------------------> Check Table Sync Dates <-----------------====================\\
+	public static SyncEntry getTableSyncInfo(Context appContext, String dbName, String table) {
+		TableSyncDb syncTable = self().getTableSyncDB(appContext, dbName);
+		self().acquireConnection(appContext, dbName, syncTable);
+		SyncEntry info = syncTable.getTableSyncData(table);
+		//check if entry exists, if not then create it
+		if (!info.getTableName().equalsIgnoreCase(table)) {
+			//save it since it doesn't exist
+			info.setTableName(table);
+			syncTable.insertOrUpdate(info);
+		}
+		self().releaseConnection(syncTable);
+		return info;
+	}
+
+	public static Result setTableSyncInfo(Context appContext, String dbName, SyncEntry info) {
+		Result r = new Result();
+		TableSyncDb syncTable = self().getTableSyncDB(appContext, dbName);
+		self().acquireConnection(appContext, dbName, syncTable);
+		r = syncTable.insertOrUpdate(info);
+		//check if entry exists, if not then create it
+		self().releaseConnection(syncTable);
+		return r;
+	}
 
 	
 }
