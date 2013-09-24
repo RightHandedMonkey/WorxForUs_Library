@@ -16,7 +16,7 @@ import com.worxforus.Result;
 import com.worxforus.SyncEntry;
 import com.worxforus.db.TableInterface;
 
-public class TableSyncDb extends TableInterface {
+public class TableSyncDb extends TableInterface<SyncEntry> {
 
 	public static final String DATABASE_TABLE = "table_sync";
 	public static final int TABLE_VERSION = 1; 
@@ -152,7 +152,17 @@ public class TableSyncDb extends TableInterface {
 			return r;
 		}
 	}
-	
+		
+	public Result insertOrUpdateArrayList(ArrayList<SyncEntry> t) {
+		Result r = new Result();
+		beginTransaction();
+		for (SyncEntry item : t) {
+			r.add_results_if_error(insertOrUpdate(item), "Could not add SyncEntry "+t+" to database." );
+		}
+		endTransaction();
+		return r;
+	}
+
 	public SyncEntry getTableSyncData(String table) {
 		//String where = KEY_NUM+" = "+user_num;
 		SyncEntry c= new SyncEntry();
@@ -251,5 +261,6 @@ public class TableSyncDb extends TableInterface {
 		}
 
 	}
+
 
 }

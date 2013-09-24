@@ -1,8 +1,12 @@
 package com.worxforus;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.StatusLine;
 import org.json.JSONObject;
@@ -63,6 +67,28 @@ public class Utils {
 		return dateFormat.format(d);
 	}
 
+	public static Date getDatetimeObject(String mysql_date_str) {
+		DateFormat dateFormat = new SimpleDateFormat(
+				Utils.MYSQL_DATETIME_FORMAT);
+		// set to eastern time zone
+		dateFormat.setTimeZone(TimeZone.getTimeZone(MYSQL_TIMEZONE));
+		Date d;
+		try {
+			d = dateFormat.parse(mysql_date_str);
+		} catch (ParseException e) {
+			d = new java.util.Date(1980, 1, 1);
+		}
+		return d;
+	}
+	
+	public static Date getCurrentDatetime() {
+		// set to eastern time zone
+		TimeZone tz = TimeZone.getTimeZone(MYSQL_TIMEZONE);
+		GregorianCalendar gc = new GregorianCalendar(tz);
+		Date now = gc.getTime();
+		return now;
+	}
+	
 	public static String get_current_datetime_str_for_filename() {
 		DateFormat dateFormat = new SimpleDateFormat(Utils.FILE_DATETIME_FORMAT);
 		// set to eastern time zone
@@ -106,30 +132,7 @@ public class Utils {
     }
 
     
-	public static boolean is_debug_mode(Context context) {
 
-		boolean result = false;
-		String DEBUGKEY = "308201e53082014ea00302010202044ef4cb7b300d06092a864886f70d01010505003037310b30090603550406130255533110300e060355040a1307416e64726f6964311630140603550403130d416e64726f6964204465627567301e170d3131313232333138343230335a170d3431313231353138343230335a3037310b30090603550406130255533110300e060355040a1307416e64726f6964311630140603550403130d416e64726f696420446562756730819f300d06092a864886f70d010101050003818d00308189028181008660d4f740dfa9ccea051298c02629e83d78096ae2b8c21f2f601d1fcc3efe46a43e21a26b931b2aca6fd8789dccf5e7da3b98fdf5fde43bf324a1fb45a98a18d2f5296cce1d86d7ff10331e67cb84c7424701a8d3af18e780bf2d62d0886bce6e67273bf9466f9fcd2a4cb77ac06c11caab581a6a70d49482a26f32377b52690203010001300d06092a864886f70d0101050500038181001dcb40276ab571e75c8d4af3acc4c3b5f56112f690203cadf190f2d14581442dfe2ff446953590888b3dae41520d73c4875e854d4c6650116722e062ec245875710ffdabf2d0c85715667fd7f87fd5da515db30e64cc2bbc1f6fb3e5078a0ec53f170f491b22a528e182d1db8c4004a877500ac376cb2cbfc72bdf77e7939c32";
-		String TAG = "com.worxforus.Utils";
-		try {
-			ComponentName comp = new ComponentName(context, context.getClass());
-			PackageInfo pinfo = context.getPackageManager().getPackageInfo(
-					comp.getPackageName(), PackageManager.GET_SIGNATURES);
-			android.content.pm.Signature sigs[] = pinfo.signatures;
-			for (int i = 0; i < sigs.length; i++)
-				Log.d(TAG, sigs[i].toCharsString());
-			if (DEBUGKEY.equals(sigs[0].toCharsString())) {
-				result = true;
-				Log.d(TAG, "package has been signed with the debug key");
-			} else {
-				Log.d(TAG, "package signed with a key other than the debug key");
-			}
-
-		} catch (android.content.pm.PackageManager.NameNotFoundException e) {
-			return false;
-		}
-		return result;
-	}
 
 	public static void sleep(int msec) {
 		try { // gradually increase timeout if not successful
@@ -138,5 +141,30 @@ public class Utils {
 			Log.e(Utils.class.getName(), "Thread could not sleep");
 		}
 	}
+	
+	/**
+	 * Get a diff between two dates
+	 * Original Source: http://stackoverflow.com/questions/1555262/calculating-the-difference-between-two-java-date-instances
+	 * @param date1 the oldest date
+	 * @param date2 the newest date
+	 * @param timeUnit the unit in which you want the diff
+	 * @return the diff value, in the provided unit
+	 */
+	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+	    long diffInMillies = date2.getTime() - date1.getTime();
+	    return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+	}
+	
+	/**
+	 * Used to remove a UTF-8 byte-order-mark (BOM) from a string
+	 * @param s
+	 * @return
+	 */
+    public static String removeUTF8BOM(String s) {
+        if (s.startsWith("\uFEFF")) {
+            s = s.substring(1);
+        }
+        return s;
+    }
 
 }

@@ -92,7 +92,7 @@ public class NetHandler {
 		try {
 			HttpPost post = new HttpPost(url);
 			if (params != null) {
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params,HTTP.UTF_8);
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);
 				post.setEntity(ent);
 			}
 //			long startTm = SystemClock.elapsedRealtime();
@@ -215,7 +215,9 @@ public class NetHandler {
 	public static NetResult handle_generic_json_response_helper(NetResult result, String calling_class) {
 		if (result != null && result.net_success) {
 			try {
-			     String consume_str = EntityUtils.toString(result.net_response_entity);
+	
+				 String consume_str = Utils.removeUTF8BOM(EntityUtils.toString(result.net_response_entity, Utils.CHARSET));
+//			     String consume_str = EntityUtils.toString(result.net_response_entity, Utils.CHARSET);
 			     Result response;
 		         response = Utils.getJSONObject(consume_str); //get main json
 		         result.add_results_if_error(response, "Could not read JSON object.");

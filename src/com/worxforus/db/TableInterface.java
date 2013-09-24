@@ -1,8 +1,10 @@
 package com.worxforus.db;
 
+import java.util.ArrayList;
+
 import com.worxforus.Result;
 
-public abstract class TableInterface {
+public abstract class TableInterface<T> {
 
 	//DO NOT INCREMENT THIS VALUE - Use versions for individual tables and call
 	//TableManager.verifyTable(TableClass);
@@ -45,4 +47,8 @@ public abstract class TableInterface {
 	public void setTableVerified() {
 		table_checked=true;
 	}
+	public abstract Result insertOrUpdate(T t);
+
+	public abstract Result insertOrUpdateArrayList(ArrayList<T> t);
+
 }

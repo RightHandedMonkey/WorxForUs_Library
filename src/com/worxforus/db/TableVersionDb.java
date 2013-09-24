@@ -2,7 +2,11 @@ package com.worxforus.db;
 
 
 
+import java.util.ArrayList;
+
 import com.worxforus.Result;
+import com.worxforus.SyncEntry;
+import com.worxforus.VersionEntry;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,7 +17,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class TableVersionDb extends TableInterface {
+public class TableVersionDb extends TableInterface<VersionEntry> {
 
 	public static final int TABLE_VERSION = 1; 
 	
@@ -101,7 +105,8 @@ public class TableVersionDb extends TableInterface {
 	 * When a table is updated, save the new version to the TableVersion Db
 	 */
 	protected void modifyTableVersion() {
-		insertOrUpdate(DATABASE_TABLE, TABLE_VERSION);
+		VersionEntry entry = new VersionEntry(DATABASE_TABLE, TABLE_VERSION);
+		insertOrUpdate(entry);
 	}
 	
 	/**
@@ -109,11 +114,11 @@ public class TableVersionDb extends TableInterface {
 	 * @param c
 	 * @return
 	 */
-	public Result insertOrUpdate(String table_name, int table_ver) {
+	public Result insertOrUpdate(VersionEntry entry) {
 		Result r = new Result();
 		synchronized (DATABASE_TABLE) {
 			try {
-				int index = (int)db.replaceOrThrow(DATABASE_TABLE, null, getContentValues(table_name, table_ver));
+				int index = (int)db.replaceOrThrow(DATABASE_TABLE, null, getContentValues(entry.getTableName(), entry.getTableVer()));
 				r.last_insert_id = index;
 			} catch (SQLException s) {
 				r.error = s.getMessage();
@@ -124,6 +129,14 @@ public class TableVersionDb extends TableInterface {
 	}
 	
 	
+public Result insertOrUpdateArrayList(ArrayList<VersionEntry> t) {
+	Result r = new Result();
+	for (VersionEntry item : t) {
+		r.add_results_if_error(insertOrUpdate(item), "Could not add VersionEntry "+t+" to database." );
+	}
+	return r;
+}
+
 	public Cursor getTableVersionsCursor() {
 		return db.query(DATABASE_TABLE, 
 				null, 

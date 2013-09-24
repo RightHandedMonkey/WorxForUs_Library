@@ -2,6 +2,7 @@ package com.worxforus.db;
 
 import com.worxforus.Result;
 import com.worxforus.SyncEntry;
+import com.worxforus.VersionEntry;
 
 import junit.framework.Assert;
 
@@ -124,7 +125,7 @@ public class TableManager {
 	 */
 	private static void modifyTableVersion(Context appContext, String dbName, String tableName, int currentVersion) {
 		self().getConnectionHelper().acquire(self().getTableVersionDB(appContext, dbName));
-		self().getTableVersionDB(appContext, dbName).insertOrUpdate(tableName, currentVersion);
+		self().getTableVersionDB(appContext, dbName).insertOrUpdate(new VersionEntry(tableName, currentVersion));
 		self().getConnectionHelper().release(self().getTableVersionDB(appContext, dbName));
 	}
 
