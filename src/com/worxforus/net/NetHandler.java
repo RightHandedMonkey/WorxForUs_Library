@@ -31,11 +31,10 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.worxforus.Result;
 import com.worxforus.Utils;
+import com.worxforus.json.JSONObjectWrapper;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -88,7 +87,7 @@ public class NetHandler {
 		
 	public static NetResult handle_post(String url, List<NameValuePair> params, NetResult result) {
 		//first make sure we haven't marked as passed
-		result.clear_net_results();
+		result.clearNetResults();
 		try {
 			HttpPost post = new HttpPost(url);
 			if (params != null) {
@@ -107,25 +106,25 @@ public class NetHandler {
 		} catch (HttpResponseException e) {
 			result.net_error = "HttpResponseException Error: "+e.getMessage()+", Cause: "+e.getCause();
 			result.net_error_type = e.getClass().getName();
-			Log.e(NetResult.class.getName(), result.get_log_entry() );
+			Log.e(NetResult.class.getName(), result.getLogEntry() );
 		} catch (SocketTimeoutException e) {
 			result.net_error = "SocketTimeoutException Error: "+e.getMessage()+", Cause: "+e.getCause();
 			result.net_error_type = e.getClass().getName();
 			//Reset HTTPClient connection in calling method
 			result.net_reset_client_connection = true;
-			Log.e(NetResult.class.getName(), result.get_log_entry() );
+			Log.e(NetResult.class.getName(), result.getLogEntry() );
 		} catch (SocketException e) {
 			result.net_error = "SocketException Error: "+e.getMessage()+", Cause: "+e.getCause();
 			result.net_error_type = e.getClass().getName();
-			Log.e(NetResult.class.getName(), result.get_log_entry() );
+			Log.e(NetResult.class.getName(), result.getLogEntry() );
 		} catch (IOException e) {
 			result.net_error = "IOException Error: "+e.getMessage()+", Cause: "+e.getCause();
 			result.net_error_type = e.getClass().getName();
-			Log.e(NetResult.class.getName(), result.get_log_entry() );
+			Log.e(NetResult.class.getName(), result.getLogEntry() );
 			if (e.getMessage() == null) //different entry here for debugging purposes
-				Log.e(NetResult.class.getName(), result.get_log_entry() );
+				Log.e(NetResult.class.getName(), result.getLogEntry() );
 			else 
-				Log.e(NetResult.class.getName(), result.get_log_entry() );
+				Log.e(NetResult.class.getName(), result.getLogEntry() );
 		}
 		return result;
 	}
@@ -212,7 +211,7 @@ public class NetHandler {
 	 * @param calling_class - String to use to name calling function in log
 	 * @return
 	 */
-	public static NetResult handle_generic_json_response_helper(NetResult result, String calling_class) {
+	public static NetResult handleGenericJsonResponseHelper(NetResult result, String calling_class) {
 		if (result != null && result.net_success) {
 			try {
 	
@@ -222,7 +221,7 @@ public class NetHandler {
 		         response = Utils.getJSONObject(consume_str); //get main json
 		         result.add_results_if_error(response, "Could not read JSON object.");
 			     if (response.success) {
-	        		 result.object = (JSONObject)response.object;
+	        		 result.object = (JSONObjectWrapper)response.object;
 			     }
 			} catch (IOException e) {
 				result.error = "EntityUtils.toString threw - IOException Error: "+e.getMessage()+", Cause: "+e.getCause();
@@ -236,7 +235,7 @@ public class NetHandler {
 			result.error = "Could not communicate with Web Server.";
 			Log.i(calling_class, "Attemps to create test: "+result.num_attemps+" times, and connection was unsuccessful");
 		 }
-		result.close_net_result();
+		result.closeNetResult();
 		return result;
 		
 	}

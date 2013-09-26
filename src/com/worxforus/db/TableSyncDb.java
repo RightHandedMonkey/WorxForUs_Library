@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 
-import com.worxforus.Constants;
 import com.worxforus.Result;
 import com.worxforus.SyncEntry;
 import com.worxforus.db.TableInterface;
@@ -42,7 +41,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 	// Something like: INSERT INTO Log (id, rev_no, description) VALUES ((SELECT
 	// IFNULL(MAX(id), 0)) + 1 FROM Log), 'rev_Id', 'some description')
 
-	private static final String INDEX_1_NAME = "index_1";
+	private static final String INDEX_1_NAME = DATABASE_TABLE+"_index_1";//NOTE: Indexes must be unique across all tables in db
 	private static final String INDEX_1 = "CREATE INDEX " + INDEX_1_NAME
 			+ " ON " + DATABASE_TABLE + " (  `" + SYNC_TABLE_NAME + "`, `"+ SYNC_TABLE_DOWNLOAD_DATE + "`, `"
 			+ SYNC_TABLE_UPLOAD_DATE + "` )";
@@ -97,12 +96,12 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 	}
 
 	@Override
-	public void createTable() {
+	public synchronized void createTable() {
 		dbHelper.onCreate(db);
 	}
 
 	@Override
-	public void updateTable(int last_version) {
+	public synchronized void updateTable(int last_version) {
 		dbHelper.onUpgrade(db, last_version, TABLE_VERSION);
 	}
 
@@ -121,7 +120,13 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 			db.delete(DATABASE_TABLE, null, null);
 		}
 	}
-	
+
+	public void dropTable() {
+		db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE);
+		//invalidate table
+		invalidateTable();
+	}
+
 	public void beginTransaction() {
 		db.beginTransaction();
 	}
@@ -136,7 +141,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 	 * @param c
 	 * @return
 	 */
-	public Result insertOrUpdate(SyncEntry t) {
+	public synchronized Result insertOrUpdate(SyncEntry t) {
 		synchronized (DATABASE_TABLE) {
 			int index = -1;
 			Result r = new Result();
@@ -153,7 +158,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 		}
 	}
 		
-	public Result insertOrUpdateArrayList(ArrayList<SyncEntry> t) {
+	public synchronized Result insertOrUpdateArrayList(ArrayList<SyncEntry> t) {
 		Result r = new Result();
 		beginTransaction();
 		for (SyncEntry item : t) {
@@ -242,6 +247,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
+			Log.d(getClass().getName(), "OnCreate called for table: "+DATABASE_TABLE+" was not found in db path: "+db.getPath()+"... creating table.");
 			db.execSQL(DATABASE_CREATE);
 			db.execSQL(INDEX_1);
 		}

@@ -28,6 +28,7 @@ public abstract class TableInterface<T> {
 	//public abstract boolean checkIfTableExists();
 	
 	public abstract void createTable();
+	public abstract void dropTable();
 	
 	public abstract void updateTable(int last_version);
 
@@ -44,6 +45,8 @@ public abstract class TableInterface<T> {
 		return table_checked;
 	}
 
+	public void invalidateTable() { table_checked = false; }
+	
 	public void setTableVerified() {
 		table_checked=true;
 	}

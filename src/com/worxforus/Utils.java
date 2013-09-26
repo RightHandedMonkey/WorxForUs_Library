@@ -9,7 +9,8 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.StatusLine;
-import org.json.JSONObject;
+
+import com.worxforus.json.JSONObjectWrapper;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -115,13 +116,14 @@ public class Utils {
 		return dateFormat.format(d);
 	}
 
+	
     public static Result getJSONObject(String string) {
     	Result result = new Result();
     	
-    	JSONObject response = new JSONObject();
+    	JSONObjectWrapper response;
         try {
             // Drill into the JSON response to find the content body
-            response = new JSONObject(string);
+            response = new JSONObjectWrapper(string);
             result.object = response;
         } catch (Exception e) {
             result.success = false;

@@ -196,6 +196,11 @@ public Result insertOrUpdateArrayList(ArrayList<VersionEntry> t) {
 		return count > 0;
     }
     
+	public void dropTable() {
+		db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE);
+		//invalidate table
+		invalidateTable();
+	}
 	
 	public void createTable() {
 		dbHelper.onCreate(db);
@@ -225,6 +230,7 @@ public Result insertOrUpdateArrayList(ArrayList<VersionEntry> t) {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
+			Log.d(getClass().getName(), "Table: "+DATABASE_TABLE+" was not found in db path: "+db.getPath()+"... creating table.");
 			db.execSQL(DATABASE_CREATE);
 			
 			//Add itself to the entry

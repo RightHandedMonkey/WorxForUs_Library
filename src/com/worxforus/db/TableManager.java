@@ -5,10 +5,10 @@ import com.worxforus.SyncEntry;
 import com.worxforus.VersionEntry;
 
 import junit.framework.Assert;
-
 import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 
 /*
@@ -73,9 +73,10 @@ public class TableManager {
 		self().getConnectionHelper().release(table);
 	}
 	
-	private static void verifyTable(Context appContext, String dbName, TableInterface table) {
+	private static synchronized void verifyTable(Context appContext, String dbName, TableInterface table) {
 		if (!checkIfTableExists(appContext, dbName, table.getTableName()) ) { //make sure table exists
 			//bypass acquireConnection and use direct call in case table is the tableVersionDb b/c we'd be stuck in a loop
+			Log.d(self().getClass().getName(), "Table: "+table.getTableName()+" was not found in db: "+dbName+"... creating table.");
 			self().getConnectionHelper().acquire(table);
 			table.createTable(); //create table if not
 			self().getConnectionHelper().release(table);
@@ -83,7 +84,9 @@ public class TableManager {
 			modifyTableVersion(appContext, dbName, table.getTableName(), table.getTableCodeVersion());
 		} else {
 			int db_version = getTableVersion(appContext, dbName, table.getTableName());
-			if (needTableUpgrade(table.getTableName(), db_version, table.getTableCodeVersion()) ) {
+			int version = table.getTableCodeVersion();
+			if (needTableUpgrade(table.getTableName(), db_version, version) ) {
+				Log.d(self().getClass().getName(), "Table: "+table.getTableName()+", old version: "+db_version+", new version: "+version+" needs an update in db: "+dbName+"... creating table.");
 				//table needs update, so update it
 				self().getConnectionHelper().acquire(table);
 				table.updateTable(db_version);
