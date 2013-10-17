@@ -40,9 +40,29 @@ public class JSONObjectWrapper {
     	}
     }
     
+    public boolean has(String name) {
+    	return this.obj.has(name);
+    }
+    
+    public JSONObjectWrapper getJSONObject(String name) throws JSONExceptionWrapper {
+    	try {
+    		return new JSONObjectWrapper(obj.getJSONObject(name));
+    	} catch (JSONException e) {
+    		throw new JSONExceptionWrapper(e.getMessage());
+    	}
+    }
+    
     public int getInt(String name) throws JSONExceptionWrapper {
     	try {
     		return obj.getInt(name);
+    	} catch (JSONException e) {
+    		throw new JSONExceptionWrapper(e.getMessage());
+    	}
+    }
+    
+    public boolean getBoolean(String name) throws JSONExceptionWrapper {
+    	try {
+    		return obj.getBoolean(name);
     	} catch (JSONException e) {
     		throw new JSONExceptionWrapper(e.getMessage());
     	}

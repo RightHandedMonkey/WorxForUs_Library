@@ -216,7 +216,6 @@ public class NetHandler {
 			try {
 	
 				 String consume_str = Utils.removeUTF8BOM(EntityUtils.toString(result.net_response_entity, Utils.CHARSET));
-//			     String consume_str = EntityUtils.toString(result.net_response_entity, Utils.CHARSET);
 			     Result response;
 		         response = Utils.getJSONObject(consume_str); //get main json
 		         result.add_results_if_error(response, "Could not read JSON object.");

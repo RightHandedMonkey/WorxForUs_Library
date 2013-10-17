@@ -21,6 +21,7 @@ public class Result {
 	public String string = "";
 	public Object object = null;
 
+	public static final String WEB_SUCCESS = "success";
 	public static final String WEB_RESULT = "result";
 	public static final String WEB_MESSAGE = "message";
 	public static final String WEB_ERROR = "error";
