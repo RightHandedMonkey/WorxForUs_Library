@@ -30,4 +30,8 @@ public interface SyncInterface<T> extends PoolObjectFactory<T> {
 	 * @return Result object - with result.object = ArrayList<T> of the given type
 	 */
 	public abstract Result parseJSONtoArrayList(JSONArrayWrapper jsonArr, Pool<T> pool);
+	
+	public abstract boolean requireAuthOnDownload();
+	
+	public abstract boolean requireAuthOnUpload();
 }

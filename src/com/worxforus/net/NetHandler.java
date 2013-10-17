@@ -63,14 +63,14 @@ public class NetHandler {
 	public static NetHandler getInstance() {
 		return singleton;
 	}
-	
-	public static NetResult handle_post_with_retry(String url, List<NameValuePair> params, int num_retries) {
+		
+	public static NetResult handlePostWithRetry(String url, List<NameValuePair> params, int num_retries) {
 		NetResult result = new NetResult();
 		int cur_try = 0;
 		while(cur_try < num_retries && result.net_success==false) {
 			cur_try++;
 			Log.d(NetHandler.class.getName(), "handle_post_with_retry, attempt# "+cur_try);
-			NetHandler.handle_post(url, params, result);
+			NetHandler.handlePost(url, params, result);
 			//set num_attemps here
 			result.num_attemps = cur_try;
 			
@@ -85,7 +85,7 @@ public class NetHandler {
 		return result;
 	}
 		
-	public static NetResult handle_post(String url, List<NameValuePair> params, NetResult result) {
+	public static NetResult handlePost(String url, List<NameValuePair> params, NetResult result) {
 		//first make sure we haven't marked as passed
 		result.clearNetResults();
 		try {

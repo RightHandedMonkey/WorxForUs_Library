@@ -18,6 +18,7 @@ import com.worxforus.db.TableInterface;
 import com.worxforus.db.TableManager;
 import com.worxforus.db.TableSyncDb;
 import com.worxforus.json.JSONExceptionWrapper;
+import com.worxforus.net.NetAuthentication.NetAuthenticationHelper;
 
 
 /**
@@ -26,7 +27,7 @@ import com.worxforus.json.JSONExceptionWrapper;
  *
  */
 public class SyncTableManager {
-	
+
 	//Sync Identifiers
 	public static final String ITEM_LIMIT_PER_PAGE = "item_limit_per_page"; //number of items to send for a given page
 	public static final String ITEMS_TOTAL = "items_total"; //number of items found for given request (not including paging)
@@ -37,7 +38,7 @@ public class SyncTableManager {
 	public static final String FROM_DATETIME = "from_datetime"; //The datetime that the device previously has data for. Will be blank if never synchronized.
 
 	public static final int SYNC_TTL_SECS = 86400; //86400 sec=24 hours - This is how long we need to have from the last sync for recommending a sync
-
+	
 	public <T> Result addToDatabaseHelper(Context c, ArrayList<T> objects, String dbName, TableInterface<T> table) {
         Log.i(this.getClass().getName(), "Adding retrieved network objects to:"+table.getTableName());
 		TableManager.acquireConnection(c, dbName, table);
@@ -75,7 +76,12 @@ public class SyncTableManager {
 			String url = syncObject.getDownloadURL(host);
 			//For the first call we don't know what the toDate is because we get that from the server
 			List<NameValuePair> params = syncObject.getDownloadParams(0, limitPerPage, lastSync, "");
-			NetResult netResult = NetHandler.handle_post_with_retry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+			NetResult netResult;
+			if (syncObject.requireAuthOnDownload()) {
+				netResult = AuthNetHandler.handleAuthPostWithRetry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+			} else {
+				netResult = NetHandler.handlePostWithRetry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+			}
 			NetHandler.handleGenericJsonResponseHelper(netResult, this.getClass().getName());
 			//get json array
 			r.success = netResult.net_success;
@@ -100,7 +106,12 @@ public class SyncTableManager {
 					if(netResult.net_success) {
 						//now we know what the toDate should be so send that along
 						params = syncObject.getDownloadParams(cur_page, syncInfo.itemLimitPerPage, lastSync, syncInfo.toDatetime);
-						netResult = NetHandler.handle_post_with_retry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+						
+						if (syncObject.requireAuthOnDownload()) {
+							netResult = AuthNetHandler.handleAuthPostWithRetry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+						} else {
+							netResult = NetHandler.handlePostWithRetry(url, params , NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+						}
 						NetHandler.handleGenericJsonResponseHelper(netResult, this.getClass().getName());
 						if (netResult.net_success) {
 							try {

@@ -64,7 +64,7 @@ public class NetAuthentication {
     * The NetHelper interface is used to attempt access multiple retries if needed 
     * @return NetResult - NetResult.success tells if the login worked or not
     */
-   public static NetResult authenticate(String host, NetAuthenticationHelper netHelper) {
+   public static NetResult authenticate(String host, NetAuthenticationHelper authHelper) {
 	   synchronized(NetAuthentication.getInstance()) { //so we can only try to authenticate one at a time
 		   //check if current authentication is valid
 		   NetResult result = new NetResult();
@@ -75,21 +75,21 @@ public class NetAuthentication {
 		   
 		   //if username/password available use that
 		   if (NetAuthentication.getInstance().username.length() > 0 && NetAuthentication.getInstance().password.length() > 0) {
-			   result = netHelper.handleUsernameLogin(host, NetAuthentication.getInstance().username, NetAuthentication.getInstance().password);
+			   result = authHelper.handleUsernameLogin(host, NetAuthentication.getInstance().username, NetAuthentication.getInstance().password);
 		   } else if (NetAuthentication.getInstance().accessToken.length() > 0 && NetAuthentication.getInstance().uuid.length() > 0) {
-			   result = netHelper.handleUsernameLogin(host, NetAuthentication.getInstance().accessToken, NetAuthentication.getInstance().uuid);
+			   result = authHelper.handleUsernameLogin(host, NetAuthentication.getInstance().accessToken, NetAuthentication.getInstance().uuid);
 		   } else {
 			   //error - no login credentials specified.
 			   result.success = false;
 			   result.net_success = true; //since this is not a network problem
 			   //set result to read as login failure
-			   netHelper.markAsLoginFailure(result);
+			   authHelper.markAsLoginFailure(result);
 		   }
 	
 		   //check for login error - read response as a json object
 		   //this function below should be called in NetAUthenticationHelper.handleXXXLogin(...);
 		   //NetHandler.handleGenericJsonResponseHelper(result, NetAuthentication.class.getName());
-		   int status = netHelper.checkForLoginError(result);
+		   int status = authHelper.checkForLoginError(result);
 		   NetAuthentication.getInstance().loginStatus = status;
 		   if (status == NO_ERRORS) {
 			   NetAuthentication.getInstance().lastLoginTime = System.nanoTime();
@@ -107,7 +107,7 @@ public class NetAuthentication {
     * Returns true if the cache value looks ok and we think we are still logged in.
     * Returns false if not.
     */
-   protected static boolean isCurrentAuthenticationValid() {
+   public static boolean isCurrentAuthenticationValid() {
 	   if (NetAuthentication.getInstance().isLoggedIn) {
 		   long time_diff_nano = System.nanoTime() - NetAuthentication.getInstance().lastLoginTime;
 		   long time_diff_sec = time_diff_nano/1000000000; //convert nanoseconds to seconds: nano/micro/milli
@@ -148,6 +148,12 @@ public class NetAuthentication {
 	    * @param result
 	    */
 	   public void markAsLoginFailure(NetResult result);
+
+	   /**
+	    * With this function, AuthNetHandler can use it to send an error message back up to the application
+	    * @return
+	    */
+		public String getLoginErrorMessage();
 
 	   /**
 	    * This function is to be used by external classes that check to see if a login error was created when a
