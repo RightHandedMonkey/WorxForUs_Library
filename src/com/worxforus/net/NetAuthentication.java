@@ -70,8 +70,10 @@ public class NetAuthentication {
 		   NetResult result = new NetResult();
 		   result.net_success = true;
 	
-		   if (NetAuthentication.isCurrentAuthenticationValid()) 
+		   if (NetAuthentication.isCurrentAuthenticationValid()) {
+			   authHelper.markAsLoginSuccessFromCache(result);
 			   return result; //don't sent to network - expect to be able to use the cookie.
+		   }
 		   
 		   //if username/password available use that
 		   if (NetAuthentication.getInstance().username.length() > 0 && NetAuthentication.getInstance().password.length() > 0) {
@@ -89,7 +91,7 @@ public class NetAuthentication {
 		   //check for login error - read response as a json object
 		   //this function below should be called in NetAUthenticationHelper.handleXXXLogin(...);
 		   //NetHandler.handleGenericJsonResponseHelper(result, NetAuthentication.class.getName());
-		   int status = authHelper.checkForLoginError(result);
+		   int status = authHelper.validateLoginResponse(result);
 		   NetAuthentication.getInstance().loginStatus = status;
 		   if (status == NO_ERRORS) {
 			   NetAuthentication.getInstance().lastLoginTime = System.nanoTime();
@@ -148,6 +150,13 @@ public class NetAuthentication {
 	    * @param result
 	    */
 	   public void markAsLoginFailure(NetResult result);
+	   
+	   /**
+	    * Use this function to force the result to appear as a login success due to cache hit 
+	    * This simulates a login success so it can be reported back to the calling class
+	    * @param result
+	    */
+	   public void markAsLoginSuccessFromCache(NetResult result);
 
 	   /**
 	    * With this function, AuthNetHandler can use it to send an error message back up to the application
@@ -155,18 +164,27 @@ public class NetAuthentication {
 	    */
 		public String getLoginErrorMessage();
 
+		/**
+		 * This function is called after a request for the login page to see if a login error was created
+		 * 
+		 * @param netResult - most useful for netResult.object to be a json object
+		 * @return int containing loginStatus based on given netResult
+		 */
+		public int validateLoginResponse(NetResult netResult);
+		
 	   /**
-	    * This function is to be used by external classes that check to see if a login error was created when a
-	    * failure is detected in from another network request.  If json object contains error with the NOT_LOGGED_IN string, then invalidate should be called
-
-	    * NetResult.success == true on success
-	    * if NetResult.success == false
-	    * NetResult.net_result == false on network failure
+	    * This function is to be used by external classes that check to see if a login error was created.
+	    * Run after using a network command to any page other than the login interface page.
+	    * This does not check for all login failures, but only:
+	    * 	NO_ERRORS
+	    *   NOT_LOGGED_IN
+	    * 
+	    * If this returns the error with the NOT_LOGGED_IN string, then NetAuthentication.invalidate() should be called
 	    * 
 	    * @param netResult - most useful for netResult.object to be a json object
-	    * @return int containing loginStatus based on given netResult
+	    * @return int containing loginStatus based on given netResult - either NO_ERRORS or NOT_LOGGED_IN
 	    */
-	   public int checkForLoginError(NetResult netResult);
+	   public int peekForNotLoggedInError(NetResult netResult);
 
 	   /**
 	    * Login to the getLoginURL() with the given username and password.  Expect a json success response or failure

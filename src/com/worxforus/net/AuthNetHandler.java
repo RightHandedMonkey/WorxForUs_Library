@@ -37,7 +37,7 @@ public class AuthNetHandler {
 	 */
 	public static NetResult handleAuthPostWithRetry(String url, List<NameValuePair> params, int num_retries) {
 		if (!AuthNetHandler.isAuthenticationSet() ) {
-			throw new RuntimeException("Using handleAuthPostWithRetry(..) requires that setAuthentication(..) is called first.");
+			throw new RuntimeException("Using handleAuthPostWithRetry(..) requires that AuthNetHandler.setAuthentication(..) is called first.");
 		}
 		NetResult netResult = new NetResult();
 		int loginStatus = handleLoginAttempt(); //AuthNetHandler.authHelper.checkForLoginError(netResult);
@@ -49,8 +49,8 @@ public class AuthNetHandler {
 		} else if (loginStatus == NetAuthentication.NO_ERRORS) {
 			//continue on with request
 			netResult = NetHandler.handlePostWithRetry(url, params, num_retries);
-			//check for errors
-			loginStatus = AuthNetHandler.authHelper.checkForLoginError(netResult);
+			//check for errors - use peek here instead of validate since we are not connecting to login interface page
+			loginStatus = AuthNetHandler.authHelper.peekForNotLoggedInError(netResult);
 			if (loginStatus == NetAuthentication.NOT_LOGGED_IN) {
 				//this means that the authenticate(..) function used a saved value, but server indicates user not logged in, so reset it.
 				NetAuthentication.invalidate();
@@ -65,7 +65,8 @@ public class AuthNetHandler {
 	
 	private static int handleLoginAttempt() {
 		NetResult netResult = NetAuthentication.authenticate(AuthNetHandler.host, AuthNetHandler.authHelper);
-		int loginStatus = AuthNetHandler.authHelper.checkForLoginError(netResult);
+		
+		int loginStatus = AuthNetHandler.authHelper.validateLoginResponse(netResult);
 		//for certain values, we don't even try to complete the request.
 		return loginStatus;
 	}
