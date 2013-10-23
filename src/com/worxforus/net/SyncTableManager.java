@@ -144,6 +144,7 @@ public class SyncTableManager {
 
 			} else {
 				r.technical_error = netResult.getLogEntry();
+				r.error = "Could not reach page for ["+table.getTableName()+"] because of a network error.";
 				r.success = false;
 			}
         Log.i(this.getClass().getName(), "Finished sync network operation, result:"+r.toString());
