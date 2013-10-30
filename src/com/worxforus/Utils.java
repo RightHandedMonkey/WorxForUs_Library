@@ -38,6 +38,17 @@ public class Utils {
 
 	public static final String CHARSET = "UTF-8";
 
+	/**
+	 * Only sends the data to the android log system if it detects we are a debug build
+	 * Utils.LogD(tag, msg);
+	 * @param tag
+	 * @param msg
+	 */
+	public static void LogD(String tag, String msg) {
+		if (BuildConfig.DEBUG)
+			Log.d(tag, msg);
+	}
+	
 	public static void debug_toast(Activity app, boolean debug, String msg) {
 		if (debug) {
 			Toast toast = Toast.makeText(app.getApplicationContext(), msg,

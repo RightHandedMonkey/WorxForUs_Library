@@ -25,6 +25,7 @@ public class Result {
 	public static final String WEB_RESULT = "result";
 	public static final String WEB_MESSAGE = "message";
 	public static final String WEB_ERROR = "error";
+	public static final String WEB_STRING = "string";
 
 	// Constructor
 	public Result() {

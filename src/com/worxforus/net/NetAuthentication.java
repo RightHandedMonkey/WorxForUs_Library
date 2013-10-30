@@ -1,5 +1,7 @@
 package com.worxforus.net;
 
+import android.content.Context;
+
 import com.worxforus.json.JSONObjectWrapper;
 import com.worxforus.net.NetResult;
 
@@ -11,6 +13,7 @@ public class NetAuthentication {
 	private String uuid=""; //when combined with accessToken it can be used instead of a password
 	private volatile boolean isLoggedIn = false; //store if we have been authenticated
 	private long lastLoginTime = 0; //stores last time we authenticated
+	private int usernum=-1;
 	
 	protected volatile int loginStatus = 0; //starts as false to indicate we haven't attempted the connection yet
 	
@@ -49,6 +52,14 @@ public class NetAuthentication {
     */
    public static int getLoginStatus() {
 	   return NetAuthentication.getInstance().loginStatus;   
+   }
+   
+   /**
+    * Returns the last authenticated user - does not reset on invalidate (ie. failed authentication)
+    * @return
+    */
+   public static int getUsernum() {
+	   return NetAuthentication.getInstance().usernum;   
    }
    
    public static void loadAccessToken(String token, String uuid) {
@@ -96,6 +107,9 @@ public class NetAuthentication {
 		   if (status == NO_ERRORS) {
 			   NetAuthentication.getInstance().lastLoginTime = System.nanoTime();
 			   NetAuthentication.getInstance().isLoggedIn = true;
+			   NetAuthentication.getInstance().usernum = authHelper.getUsernum(result);
+			   if (NetAuthentication.getInstance().usernum > 0)
+				   authHelper.persistUsernum(NetAuthentication.getInstance().usernum);
 		   } else {
 			   NetAuthentication.invalidate();
 			   result.success = false;
@@ -144,6 +158,20 @@ public class NetAuthentication {
 	    */
 	   public String getLoginURL(String host);
 	   
+	   /**
+	    * Use this function to save a usernumber into the application.  Store in the preferences for example.
+	    * @param result
+	    * @return
+	    */
+	   public void persistUsernum(int usernum);
+
+	   /**
+	    * Use this function to read a given response from a website and return the user number
+	    * @param result
+	    * @return
+	    */
+	   public int getUsernum(NetResult result);
+
 	   /**
 	    * Use this function to force the result to appear as a login failure 
 	    * This simulates a login failure so it can be reported back to the calling class
