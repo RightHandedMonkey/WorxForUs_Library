@@ -12,11 +12,15 @@ import org.apache.http.StatusLine;
 
 import com.worxforus.json.JSONObjectWrapper;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Looper;
+import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -38,6 +42,12 @@ public class Utils {
 
 	public static final String CHARSET = "UTF-8";
 
+	public static String isRunningOnMainThread() {
+		if (Looper.myLooper() == Looper.getMainLooper()) 
+			return "Currently running on the main thread.";
+		else
+			return "Not running on the main thread.";
+	}
 	/**
 	 * Only sends the data to the android log system if it detects we are a debug build
 	 * Utils.LogD(tag, msg);
@@ -47,6 +57,38 @@ public class Utils {
 	public static void LogD(String tag, String msg) {
 		if (BuildConfig.DEBUG)
 			Log.d(tag, msg);
+	}
+	
+	/**
+	 * This activates the android strict mode for platforms that have access to it.  Does not activate
+	 * Strict Mode unless it is running a debug build.
+	 */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static void activateStrictMode() {
+		if (BuildConfig.DEBUG) { //only activate in the debug build
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+	         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+//             .detectDiskReads()
+//             .detectDiskWrites()
+//             .detectNetwork()   // or .detectAll() for all detectable problems
+             .penaltyLog()
+             .build());
+	         StrictMode.VmPolicy.Builder b = new StrictMode.VmPolicy.Builder()
+             .detectLeakedSqlLiteObjects()
+             .penaltyLog()
+             .penaltyDeath();
+	         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+	        	 Utils.activateStrictModeHoneycombHelper(b);
+	         }
+	         StrictMode.setVmPolicy(b.build());
+			}
+		}
+	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private static StrictMode.VmPolicy.Builder activateStrictModeHoneycombHelper(StrictMode.VmPolicy.Builder b) {
+		b.detectLeakedClosableObjects();
+		return b;
 	}
 	
 	public static void debug_toast(Activity app, boolean debug, String msg) {
