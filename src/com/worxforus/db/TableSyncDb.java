@@ -78,13 +78,13 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 				// design decision here. Db should not be locked if I wait for
 				// the previous activity to close
 				// fully before opening the next one.
-				r.error = "Database is locked. " + e.getMessage();
+				r.technical_error = "Database is locked. " + e.getMessage();
 				r.success = false;
 			} else {
-				r.error = "Could not open database. " + e.getMessage();
+				r.technical_error = "Could not open database. " + e.getMessage();
 				r.success = false;
 			}
-			Log.e(this.getClass().getName(), r.error);
+			Log.e(this.getClass().getName(), r.technical_error);
 		}
 		return r;
 	}
@@ -151,7 +151,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 				r.last_insert_id = index;
 			} catch( Exception e ) {
 				Log.e(this.getClass().getName(), e.getMessage());
-				r.error = e.getMessage();
+				r.technical_error = e.getMessage();
 				r.success = false;
 			}
 			return r;
@@ -168,6 +168,27 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 		return r;
 	}
 
+	/**
+	 * This function needs to be called when a change of login is made so that the website can requery for all the logged in user data.
+	 * If this is not done, then old data that was not downloaded will be missing on the device
+	 * Usage:
+	 * 
+	 * @return
+	 */
+	public synchronized Result resetSyncData() {
+		Result r = new Result();
+    	ContentValues vals = new ContentValues();
+    	vals.put(SYNC_TABLE_DOWNLOAD_DATE, "");
+		try {
+				db.update(DATABASE_TABLE, vals, null, null);
+		} catch (Exception e) {
+			Log.e(this.getClass().getName(), e.getMessage());
+			r.technical_error = e.getMessage();
+			r.success = false;
+		}
+		return r;
+	}
+	
 	public SyncEntry getTableSyncData(String table) {
 		//String where = KEY_NUM+" = "+user_num;
 		SyncEntry c= new SyncEntry();

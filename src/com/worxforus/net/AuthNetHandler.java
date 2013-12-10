@@ -6,6 +6,17 @@ import org.apache.http.NameValuePair;
 
 import com.worxforus.net.NetAuthentication.NetAuthenticationHelper;
 
+/**
+ * This is the net handler to handle authenticated requests to/from the network with automatic login attempts.  
+ * Includes allowing multiple network retries in case of transmission failure.
+ * 
+ * Usage:
+ * Set the authentication object
+ * AuthNetHelper.setAuthentication("host", subclassed NetAuthentication.NetAuthenticationHelper);
+ * 
+ * @author sbossen
+ *
+ */
 public class AuthNetHandler {
 	static String host;
 	static NetAuthenticationHelper authHelper;

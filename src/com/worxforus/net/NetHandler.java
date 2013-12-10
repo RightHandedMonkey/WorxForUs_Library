@@ -36,7 +36,11 @@ import com.worxforus.Result;
 import com.worxforus.Utils;
 import com.worxforus.json.JSONObjectWrapper;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.SystemClock;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 /**
@@ -64,6 +68,25 @@ public class NetHandler {
 		return singleton;
 	}
 		
+	public static boolean isNetworkConnected(Context c) {
+		    boolean status=false;
+		    try{
+		        ConnectivityManager cm = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
+		        NetworkInfo netInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		        if (netInfo != null && netInfo.getState()==NetworkInfo.State.CONNECTED) {
+		            status= true;
+		        }else {
+		            netInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		            if(netInfo!=null && netInfo.getState()==NetworkInfo.State.CONNECTED)
+		                status= true;
+		        }
+		    }catch(Exception e){
+		    	Utils.LogD(NetHandler.class.getName(), e.getMessage());
+		        return false;
+		    }
+		    return status;
+	}
+	
 	public static NetResult handlePostWithRetry(String url, List<NameValuePair> params, int num_retries) {
 		NetResult result = new NetResult();
 		int cur_try = 0;

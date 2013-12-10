@@ -164,6 +164,15 @@ public class TableManager {
 		self().releaseConnection(syncTable);
 		return r;
 	}
+	
+	public static Result resetSyncData(Context appContext, String dbName) {
+		Result r = new Result();
+		TableSyncDb syncTable = self().getTableSyncDB(appContext, dbName);
+		self().acquireConnection(appContext, dbName, syncTable);
+		r = syncTable.resetSyncData();
+		self().releaseConnection(syncTable);
+		return r;
+	}
 
 	
 }

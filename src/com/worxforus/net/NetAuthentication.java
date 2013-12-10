@@ -5,6 +5,11 @@ import android.content.Context;
 import com.worxforus.json.JSONObjectWrapper;
 import com.worxforus.net.NetResult;
 
+/*
+ * This class is used to contain the login credentials in memory and to handle actual responses to the network to/from login attempts
+ * 
+ * Usage requires NetAuthentication.NetAuthenticationHelper to be subclassed
+ */
 public class NetAuthentication {
 	
 	private String username="";
@@ -151,7 +156,21 @@ public class NetAuthentication {
    public static void invalidate() {
 	   NetAuthentication.getInstance().isLoggedIn = false;
    }
-   
+
+   /**
+    * This function returns true if there is a username or accessToken (or other token) present that allows for the system
+    * to attempt a login.
+    * @return
+    */
+   public static boolean isReadyForLogin() {
+	   if ((NetAuthentication.getInstance().username != null && NetAuthentication.getInstance().username.length() > 0)
+			   || (NetAuthentication.getInstance().accessToken != null && NetAuthentication.getInstance().accessToken.length() > 0 && NetAuthentication.getInstance().uuid.length() > 0 )) {
+		   return true;
+	   } else {
+		   return false;
+	   }
+   }
+
    public interface NetAuthenticationHelper {
 	   /**
 	    * @return url of where to send login request
@@ -225,5 +244,6 @@ public class NetAuthentication {
 	   public NetResult handleUsernameLogin(String host, String username, String password);
 	   
 	   public NetResult handleTokenLogin(String host, String accessToken, String uuid);
+	   
    }
 }
