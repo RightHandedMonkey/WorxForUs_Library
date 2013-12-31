@@ -20,9 +20,9 @@ public interface SyncInterface<T> extends PoolObjectFactory<T> {
 	
 	public abstract String getUploadURL(String host);
 	
-	public abstract List<NameValuePair> getUploadParams(ArrayList<T> objects);
+	public abstract List<NameValuePair> getUploadParams(List<T> uploadObjects);
 
-	public abstract List<NameValuePair> fillInObjectParams(ArrayList<T> list, List<NameValuePair> params);
+	public abstract List<NameValuePair> fillInObjectParams(List<T> list, List<NameValuePair> params);
 	
 	/**
 	 * Takes a json array and converts to an ArrayList of the object type
@@ -34,4 +34,6 @@ public interface SyncInterface<T> extends PoolObjectFactory<T> {
 	public abstract boolean requireAuthOnDownload();
 	
 	public abstract boolean requireAuthOnUpload();
+	
+	public abstract void markUploaded();
 }

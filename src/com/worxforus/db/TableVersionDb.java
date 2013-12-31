@@ -219,6 +219,10 @@ public Result insertOrUpdateArrayList(ArrayList<VersionEntry> t) {
 		return TABLE_VERSION;
 	}
 
+	@Override
+	public ArrayList<VersionEntry> getUploadItems() {
+		return null;
+	}
 
 	//================------------> helper class <-----------==============\\
 	private static class TableVersionDbHelper extends SQLiteOpenHelper {
@@ -255,6 +259,8 @@ public Result insertOrUpdateArrayList(ArrayList<VersionEntry> t) {
 		}
 		
 	}
+
+
 
 		
 }

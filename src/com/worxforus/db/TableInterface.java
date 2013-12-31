@@ -53,5 +53,7 @@ public abstract class TableInterface<T> {
 	public abstract Result insertOrUpdate(T t);
 
 	public abstract Result insertOrUpdateArrayList(ArrayList<T> t);
+	
+	public abstract ArrayList<T> getUploadItems(); 
 
 }

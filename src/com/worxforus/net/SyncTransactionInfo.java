@@ -8,6 +8,7 @@ import com.worxforus.json.JSONObjectWrapper;
 public class SyncTransactionInfo {
 	public int totalItems = 0;
 	public int retrievedItems = 0;
+	public int servedItems = 0;
 	public int itemLimitPerPage = 0;
 	public int numPages = 0;
 	public JSONObjectWrapper json;
@@ -48,6 +49,17 @@ public class SyncTransactionInfo {
 		json = (JSONObjectWrapper) netResult.object;
 		jsonItemArray = json.getJSONArray(SyncTableManager.ITEMS);
 		selectedPage = ((JSONObjectWrapper) netResult.object).getInt(SyncTableManager.SELECTED_PAGE);
+		return netResult;
+	}
+	
+	public NetResult loadFirstUploadDetails(NetResult netResult) throws JSONExceptionWrapper {
+		servedItems = ((JSONObjectWrapper) netResult.object).getInt(SyncTableManager.ITEMS_READ);
+		toDatetime = ((JSONObjectWrapper) netResult.object).getString(SyncTableManager.TO_DATETIME);
+		return netResult;
+	}
+	
+	public NetResult loadUploadDetails(NetResult netResult) throws JSONExceptionWrapper {
+		servedItems = ((JSONObjectWrapper) netResult.object).getInt(SyncTableManager.ITEMS_READ);
 		return netResult;
 	}
 }

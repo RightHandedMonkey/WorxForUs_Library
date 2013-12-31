@@ -256,7 +256,12 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 		return c;
 	}
 	
-    // ================------------> helper class <-----------==============\\
+	@Override
+	public ArrayList<SyncEntry> getUploadItems() {
+		return null;
+	}
+
+	// ================------------> helper class <-----------==============\\
 
 	
 	private static class CTGTagTableDbHelper extends SQLiteOpenHelper {
@@ -288,6 +293,7 @@ public class TableSyncDb extends TableInterface<SyncEntry> {
 		}
 
 	}
+
 
 
 }

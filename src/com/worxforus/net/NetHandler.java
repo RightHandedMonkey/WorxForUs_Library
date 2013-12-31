@@ -230,7 +230,7 @@ public class NetHandler {
 	/**
 	 * Used to parse JSON response from webserver in result.object
 	 * Handles exceptions by logging them
-	 * @param result - object containing net Entity object
+	 * @param result - object containing net Entity object -> result.object is the JSON Object if successful
 	 * @param calling_class - String to use to name calling function in log
 	 * @return
 	 */
