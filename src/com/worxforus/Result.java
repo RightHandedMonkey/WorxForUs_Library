@@ -33,7 +33,7 @@ public class Result {
 
 	@Override
 	public String toString() {
-		return "Success: " + this.success + ", Error: " + this.error
+		return "Success: " + this.success + ", Error: " + this.error +", Tech Error: "+ this.technical_error
 				+ ", Msg: " + this.message + "SQL: " + this.sql
 				+ ", Insert Id: " + this.last_insert_id + ", Insert Index: "
 				+ this.last_insert_index;

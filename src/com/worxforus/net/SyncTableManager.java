@@ -57,7 +57,7 @@ public class SyncTableManager {
 		//check that retrieve items equals what we found
 		if (parseObjects.size() != sync.retrievedItems) {
 			r.success = false;
-			r.error = "Retrieve "+sync.getClass().getName()+" items "+parseObjects.size()+" did not match expected value: "+sync.retrievedItems;
+			r.error = "Retrieve "+sync.getClass().getName()+" items "+parseObjects.size()+" did not match expected value: "+sync.retrievedItems+" for table: "+table.getTableName()+".  ";
 			Log.e(this.getClass().getName(), r.error);
 			return r;
 		}
@@ -118,7 +118,7 @@ public class SyncTableManager {
 					else
 						syncInfo.loadUploadDetails(netResult);
 				} catch (JSONExceptionWrapper e) {
-					r.technical_error += "Could not parse JSON "+syncObject.getClass().getName()+" info:"+e.getMessage();
+					r.technical_error += "Could not parse upload transaction details in JSON "+syncObject.getClass().getName()+" info:"+e.getMessage();
 					r.success = false;
 					Log.e(this.getClass().getName(), e.getMessage());
 					break;
@@ -127,7 +127,7 @@ public class SyncTableManager {
 				if (itemsReceivedByServer != sentObjects) {
 					//an error occured and the server reported it did not get the same items we sent.
 					r.success = false;
-					r.add_technical_error("The server reported that the number of objects received was "+itemsReceivedByServer+", but "+sentObjects+" were sent.", false);
+					r.add_technical_error("The server reported that the number of objects received was "+itemsReceivedByServer+", but "+sentObjects+" were sent for table: "+table.getTableName()+".  ", false);
 				} else {
 					ArrayList<T> al = new ArrayList<T>();
 					//mark uploaded items as uploaded
@@ -135,7 +135,8 @@ public class SyncTableManager {
 						object.markUploaded();
 						al.add(object);
 					}
-					table.insertOrUpdateArrayList(al);
+					//store data into database
+					r.add_results_if_error(addToDatabaseHelper(c, al, dbName, table), "Could not add objects to database for table: "+table.getTableName());
 				}
 				
 			} else {
@@ -195,7 +196,7 @@ public class SyncTableManager {
 					Result handleResult = handleParsedObjectsHelper(syncInfo, c, dbName, table, syncObject, pool);
 					r.add_results_if_error(handleResult, handleResult.error);
 				} catch (JSONExceptionWrapper e) {
-					r.technical_error += "Could not parse JSON "+syncObject.getClass().getName()+" info:"+e.getMessage();
+					r.technical_error += "Could not parse download transaction details in JSON "+syncObject.getClass().getName()+" info:"+e.getMessage();
 					r.success = false;
 					Log.e(this.getClass().getName(), e.getMessage());
 				}
