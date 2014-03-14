@@ -1,11 +1,14 @@
 package com.worxforus.net;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
 import android.util.Log;
@@ -144,6 +147,15 @@ public class SyncTableManager {
 				//we got a network error, because r.success was true, but something went wrong
 				r.success = false;
 				r.add_technical_error(netResult.getLogEntry(), false);
+				String serverResponse="";
+				try {
+					serverResponse = EntityUtils.toString(netResult.net_response_entity, Utils.CHARSET);
+				} catch (ParseException e) {
+					serverResponse = "Parse error - "+e.getMessage();
+				} catch (IOException e) {
+					serverResponse = "IO error - "+e.getMessage();
+				}
+				Utils.LogD(this.getClass().getName(), "Error detected.  Server response was: "+serverResponse);
 				break; //stop processing results
 			}
 		}

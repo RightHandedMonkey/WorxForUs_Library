@@ -62,6 +62,7 @@ public class NetHandler {
 	public static final long TIMEOUT_CONNECTION_MGR_MS = 13000;  //5000 too slow?
 	public static final String TIMEOUT_SOCKET_MSG= "Network Timeout";
 
+	public static final int MAX_PARAMS_OUTPUT_DEBUG_LENGTH = 2048;
     private static final int HTTP_STATUS_OK = 200;
 
 	public static NetHandler getInstance() {
@@ -113,12 +114,16 @@ public class NetHandler {
 		result.clearNetResults();
 		try {
 			HttpPost post = new HttpPost(url);
+			String debugOutput = "";
 			if (params != null) {
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);
 				post.setEntity(ent);
+				debugOutput = params.toString();
+				debugOutput = debugOutput.substring(0, Math.min(debugOutput.length(), MAX_PARAMS_OUTPUT_DEBUG_LENGTH));
 			}
-//			long startTm = SystemClock.elapsedRealtime();
 			Log.d(NetHandler.class.getName(), "handle_page called for url: "+url);
+			if (debugOutput.length() > 0)
+				Utils.LogD(NetHandler.class.getName(), "params: "+debugOutput);
 			HttpResponse responsePOST = NetHandler.getHttpClient().execute(post);  
 			result.net_response_entity = responsePOST.getEntity();
 			result.net_response_message = responsePOST.getStatusLine().toString();
