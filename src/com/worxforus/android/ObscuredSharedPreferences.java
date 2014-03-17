@@ -94,7 +94,6 @@ public class ObscuredSharedPreferences implements SharedPreferences {
         public void apply() {
         	//to maintain compatibility with android level 7 
         	delegate.commit();
-//            delegate.apply();
         }
 
         @Override

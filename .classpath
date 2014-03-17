@@ -5,17 +5,17 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-core-4.3/lib/httpcore-4.3.jar" sourcepath="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-core-4.3/src">
+	<classpathentry exported="true" kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-core-4.3/lib/httpcore-4.3.jar" sourcepath="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-core-4.3/src">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-core-4.3/javadoc/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpclient-4.2.5.jar" sourcepath="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/src">
+	<classpathentry exported="true" kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpclient-4.2.5.jar" sourcepath="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/src">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/javadoc/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpclient-cache-4.2.5.jar"/>
-	<classpathentry kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpmime-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpclient-cache-4.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Transfer/Dropbox/software_projects/worxforus/HttpClientApacheLibrary/httpcomponents-client-4.2.5/lib/httpmime-4.2.5.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
