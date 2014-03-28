@@ -1,9 +1,13 @@
 package com.worxforus.db;
 
 import java.util.concurrent.Semaphore;
-
 import com.worxforus.Result;
 
+/**
+ * This class is used to gather and release the semaphores to lock access to the database.  It should not be used directly.
+ * @author sbossen
+ *
+ */
 public class ConnectionLimitHelper {
 	private final Semaphore semaphore;
 

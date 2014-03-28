@@ -5,23 +5,25 @@ import com.worxforus.SyncEntry;
 import com.worxforus.VersionEntry;
 
 import junit.framework.Assert;
-import android.app.Application;
 import android.content.Context;
-import android.database.Cursor;
 import android.util.Log;
 
 
 /*
- * - Database helper singleton style
- * table = TableManager.getTable(TableClass);
- * ConnectionManager.acquireConnection(table);
+ * Provides serialized access to the database & manages individual table versions
+ * 
+ * Usage:
+ * CustomTable table = new CustomTable(context); //CustomTable extends TableInterface
+ * TableManager.acquireConnection(context, db_name, table);
+ * table.yourTableOperationHere(..);
+ * TableManager.releaseConnection(table);
+ * 
+ * All table meta information is stored in tableVersionDb 'table_meta_data'.
+ * Table sync information is stored in tableSyncDb 'table_sync'.
  */
 
 public class TableManager {
 	private static TableManager instance = new TableManager();
-	//TODO: Would like to add a nice database table pool here of (TableInterface) objects to have a single place
-	//to check if database tables have been created and verified.
-	//for now: Create a separate TablePool class in your application
 	private ConnectionLimitHelper connHelper;
 	
 	//This table is special because all database tables store there versions here - this is checked first
@@ -59,6 +61,13 @@ public class TableManager {
 		return self().tableSyncDb;
 	}
 
+	/**
+	 * 
+	 * @param appContext
+	 * @param dbName
+	 * @param table
+	 * @return
+	 */
 	public static Result acquireConnection(Context appContext, String dbName, TableInterface table) {
 		Assert.assertNotNull(table);
 		//if table has not been verified and is not TableVersionDbHelper, check it before connecting

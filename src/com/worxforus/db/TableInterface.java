@@ -3,11 +3,17 @@ package com.worxforus.db;
 import java.util.ArrayList;
 
 import com.worxforus.Result;
+/**
+ * Usage:
+ * extend the TableInterface class based on the object you want to persist to the database.
 
+ * @author sbossen
+ *
+ * @param <T>
+ */
 public abstract class TableInterface<T> {
 
 	//DO NOT INCREMENT THIS VALUE - Use versions for individual tables and call
-	//TableManager.verifyTable(TableClass);
 	public static final int DATABASE_VERSION = 1; //to use in SQLiteOpenHelper - this is not used for migrations
 
 	protected volatile boolean table_checked=false; //Used as a flag by the TableManager so table is only checked once per app instace
@@ -23,9 +29,7 @@ public abstract class TableInterface<T> {
 	/**
 	 * When a table is updated, save the new version to the TableVersion Db
 	 */
-	//protected abstract void modify_table_version();
-	
-	//public abstract boolean checkIfTableExists();
+
 	
 	public abstract void createTable();
 	public abstract void dropTable();
