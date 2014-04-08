@@ -44,7 +44,11 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 /**
- * 
+ * This class handles your network requests and retries when necessary. 
+ * Usage:
+ *
+ * NetHandler.isNetworkConnected(context); //check if the network is ready to handle a request
+ * netResult = NetHandler.handlePostWithRetry("url", params, NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
  * @author sbossen
  *
  */
@@ -69,6 +73,11 @@ public class NetHandler {
 		return singleton;
 	}
 		
+	/**
+	 * Checks to see if the network is ready to handle a request (ie. WiFi or 3G connected, not in flight mode, etc)
+	 * @param c
+	 * @return true if network is ready
+	 */
 	public static boolean isNetworkConnected(Context c) {
 		    boolean status=false;
 		    try{
@@ -88,6 +97,18 @@ public class NetHandler {
 		    return status;
 	}
 	
+	/**
+	 * Tries to get a response from the webserver at the given url.  If a valid response is not received by the num_retries, then it fails.
+	 * result.net_success will equal false or true when successful.
+	 *
+	 * if there is a network error:
+	 * result.net_error will have the human readable string of the error
+	 * result.net_error_type will have a string of the type of exception that occurred
+	 * @param url
+	 * @param params
+	 * @param num_retries
+	 * @return NetResult
+	 */
 	public static NetResult handlePostWithRetry(String url, List<NameValuePair> params, int num_retries) {
 		NetResult result = new NetResult();
 		int cur_try = 0;
@@ -109,6 +130,18 @@ public class NetHandler {
 		return result;
 	}
 		
+	/**
+	 * Makes a single post to a url but does not attempt to retry the connection.
+	 * Result.net_success will equal false or true when successful.
+	 *
+	 * if there is a network error:
+	 * result.net_error will have the human readable string of the error
+	 * result.net_error_type will have a string of the type of exception that occurred
+	 * @param url
+	 * @param params
+	 * @param result
+	 * @return NetResult
+	 */
 	public static NetResult handlePost(String url, List<NameValuePair> params, NetResult result) {
 		//first make sure we haven't marked as passed
 		result.clearNetResults();
@@ -260,7 +293,7 @@ public class NetHandler {
 		 } else { //failure could not get communications to server
 			result.success = false;
 			result.error = "Could not communicate with Web Server.";
-			Log.i(calling_class, "Attemps to create test: "+result.num_attemps+" times, and connection was unsuccessful");
+			Log.i(calling_class, "Attempted to communicate: "+result.num_attemps+" times, and connection was unsuccessful");
 		 }
 		result.closeNetResult();
 		return result;

@@ -1,14 +1,13 @@
 package com.worxforus.net;
 
-import android.content.Context;
-
-import com.worxforus.json.JSONObjectWrapper;
 import com.worxforus.net.NetResult;
 
-/*
+/**
  * This class is used to contain the login credentials in memory and to handle actual responses to the network to/from login attempts
  * 
  * Usage requires NetAuthentication.NetAuthenticationHelper to be subclassed
+ * @author sbossen
+ *
  */
 public class NetAuthentication {
 	
@@ -127,6 +126,7 @@ public class NetAuthentication {
    /**
     * Returns true if the cache value looks ok and we think we are still logged in.
     * Returns false if not.
+    * @return
     */
    public static boolean isCurrentAuthenticationValid() {
 	   if (NetAuthentication.getInstance().isLoggedIn) {
@@ -143,7 +143,7 @@ public class NetAuthentication {
    }
    
    /**
-    * Call this function whenever the login information changes or login can be requeried.
+    * Call this function whenever the login information changes or login can be re-queried.
     */
    public static void reset() {
 	   NetAuthentication.getInstance().loginStatus = 0;

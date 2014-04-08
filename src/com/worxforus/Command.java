@@ -3,7 +3,7 @@ package com.worxforus;
 import android.content.Context;
 
 /**
- * When subclasses, note that each method should be synchronized so that
+ * When subclassing, note that each method should be synchronized so that
  * execute, attach, and release can't interrupt each other.
  * @author sbossen
  *
