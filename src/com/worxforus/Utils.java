@@ -19,11 +19,17 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * This class contains many android specific utilities for frequently occurring tasks.
+ * @author sbossen
+ *
+ */
 public class Utils {
 
 	public static final String MYSQL_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -91,11 +97,28 @@ public class Utils {
 		return b;
 	}
 	
-	public static void debug_toast(Activity app, boolean debug, String msg) {
-		if (debug) {
-			Toast toast = Toast.makeText(app.getApplicationContext(), msg,
-					Toast.LENGTH_SHORT);
-		}
+//	public static void debug_toast(Activity app, boolean debug, String msg) {
+//		if (debug) {
+//			Toast toast = Toast.makeText(app.getApplicationContext(), msg,
+//					Toast.LENGTH_SHORT);
+//		}
+//	}
+	
+	/**
+	 * Use this when you need to create a toast when you are not currently in the UI thread
+	 * @param c -application context or activity context
+	 * @param msg
+	 * @param toastTime
+	 */
+	public static void toastHelper(final Context c, final String msg, final int toastTime) {
+		Handler mainHandler = new Handler(c.getMainLooper());
+		Runnable toaster = new Runnable() {
+		   @Override
+		    public void run() {
+			   Toast.makeText(c, msg, toastTime).show();
+		    }		
+		};
+		mainHandler.post(toaster);
 	}
 
 	/**

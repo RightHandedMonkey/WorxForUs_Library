@@ -14,6 +14,9 @@ import com.worxforus.Utils;
  * Usage:
  * NetworkStateChangeNotifier.getNotifier().notifyNetworkDisconnected(); //when network found to be disconnected
  * NetworkStateChangeNotifier.getNotifier().notifyNetworkConnected(); //when network found to be connected
+ * 
+ * or to check current network status use:
+ * boolean online = NetworkStateChangeNotifier.getNotifier().getNetworkConnected() == NetworkStateChangeNotifier.NETWORK_CONNECTED;
  * @author sbossen
  *
  */
