@@ -47,12 +47,31 @@ public class ObscuredSharedPreferences implements SharedPreferences {
 
     protected SharedPreferences delegate;
     protected Context context;
-
+    private static ObscuredSharedPreferences prefs = null;
+  
     public ObscuredSharedPreferences(Context context, SharedPreferences delegate) {
         this.delegate = delegate;
         this.context = context;
     }
 
+    /**
+     * Accessor to grab the preferences.  This stores the reference in a singleton so it can be accessed repeatedly with 
+     * no performance penalty
+     * @param c - the context used to access the preferences
+     * @param appName - domain the shared preferences should be stored under
+     * @param contextMode - Typically Context.MODE_PRIVATE
+     * @return
+     */
+    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String appName, int contextMode) {
+    	if (prefs == null) {
+    		//make sure to use application context since preferences live outside an Activity
+    		//use for objects that have global scope like: prefs or starting services
+	    		prefs = new ObscuredSharedPreferences( 
+	       			 c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(appName, contextMode) );
+    	}
+    	return prefs;
+    }
+    
     public class Editor implements SharedPreferences.Editor {
         protected SharedPreferences.Editor delegate;
 
