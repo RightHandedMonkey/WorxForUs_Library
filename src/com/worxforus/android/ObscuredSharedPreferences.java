@@ -1,7 +1,5 @@
 package com.worxforus.android;
 
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,52 +10,71 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import com.worxforus.Base64Support;
-import com.worxforus.Utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.util.Log;
 
 
 /**
  * Thanks to emmby at http://stackoverflow.com/questions/785973/what-is-the-most-appropriate-way-to-store-user-settings-in-android-application/6393502#6393502
  * 
- * Simply wrap your own SharedPreferences object in this one, and any data you read/write will be automatically encrypted and decrypted. eg.
- * Usage:
- * final SharedPreferences prefs = new ObscuredSharedPreferences( 
- *   this, this.getSharedPreferences(MY_PREFS_FILE_NAME, Context.MODE_PRIVATE) );
- *
- *	// eg.    
- *	prefs.edit().putString("foo","bar").commit();
- *	prefs.getString("foo", null);
- *
- * Warning, this gives a false sense of security.  If an attacker has enough access to
- * acquire your password store, then he almost certainly has enough access to acquire your
- * source binary and figure out your encryption key.  However, it will prevent casual
- * investigators from acquiring passwords, and thereby may prevent undesired negative
- * publicity.
+ * Documentation: http://right-handed-monkey.blogspot.com/2014/04/obscured-shared-preferences-for-android.html
+ * This class has the following additions over the original:
+ *  additional logic for handling the case for when the preferences were not originally encrypted, but now are.
+ *  The secret key is no longer hard coded, but defined at runtime based on the individual device.  
+ *  The benefit is that if one device is compromised, it now only affects that device.
+ * 
+ * Simply replace your own SharedPreferences object in this one, and any data you read/write will be automatically encrypted and decrypted.
+ * 
+ * Updated usage:
+ *    ObscuredSharedPreferences prefs = ObscuredSharedPreferences.getPrefs(this, MY_APP_NAME, Context.MODE_PRIVATE);
+ *    //to get data
+ *    prefs.getString("foo", null);
+ *    //to store data
+ *    prefs.edit().putString("foo","bar").commit();
  */
 public class ObscuredSharedPreferences implements SharedPreferences {
-    protected static final String UTF8 = Utils.CHARSET; //"utf-8";
-    private static final char[] SEKRIT = { 'a', 'b', 'c', 'd', 'e' } ; // INSERT A RANDOM PASSWORD HERE.
-                                               // Don't use anything you wouldn't want to
-                                               // get out there if someone decompiled
-                                               // your app.
+    protected static final String UTF8 = "UTF-8";
+    //this key is defined at runtime based on ANDROID_ID which is supposed to last the life of the device
+    private static char[] SEKRIT=null; 
 
 
     protected SharedPreferences delegate;
     protected Context context;
     private static ObscuredSharedPreferences prefs = null;
+    
+    //Set to true if a decryption error was detected
+    //in the case of float, int, and long we can tell if there was a parse error
+    //this does not detect an error in strings or boolean - that requires more sophisticated checks
+    public static boolean decryptionErrorFlag = false; 
   
+    /**
+     * Constructor
+     * @param context
+     * @param delegate - SharedPreferences object from the system
+     */
     public ObscuredSharedPreferences(Context context, SharedPreferences delegate) {
         this.delegate = delegate;
         this.context = context;
+        SEKRIT = Settings.Secure.ANDROID_ID.toCharArray();
+    }
+    
+    /**
+     * Only used to change to a new key during runtime.
+     * If you don't want to use the default per-device key for example
+     * @param key
+     */
+    public static void setNewKey(String key) {
+    	SEKRIT = key.toCharArray();
     }
 
     /**
-     * Accessor to grab the preferences.  This stores the reference in a singleton so it can be accessed repeatedly with 
+     * Accessor to grab the preferences in a singleton.  This stores the reference in a singleton so it can be accessed repeatedly with 
      * no performance penalty
-     * @param c - the context used to access the preferences
+     * @param c - the context used to access the preferences.
      * @param appName - domain the shared preferences should be stored under
      * @param contextMode - Typically Context.MODE_PRIVATE
      * @return
@@ -157,6 +174,7 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     	} catch (ClassCastException e) {
     		return delegate.getBoolean(key, defValue);
     	}
+    	
         return v!=null ? Boolean.parseBoolean(decrypt(v)) : defValue;
     }
 
@@ -168,7 +186,14 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     	} catch (ClassCastException e) {
     		return delegate.getFloat(key, defValue);
     	}
-        return v!=null ? Float.parseFloat(decrypt(v)) : defValue;
+    	try {
+			return Float.parseFloat(decrypt(v));
+		} catch (NumberFormatException e) {
+			//could not decrypt the number.  Maybe we are using the wrong key?
+			decryptionErrorFlag = true;
+        	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  Possible incorrect key.  "+e.getMessage());
+		}
+    	return defValue;
     }
 
     @Override
@@ -179,7 +204,14 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     	} catch (ClassCastException e) {
     		return delegate.getInt(key, defValue);
     	}
-        return v!=null ? Integer.parseInt(decrypt(v)) : defValue;
+    	try {
+			return Integer.parseInt(decrypt(v));
+		} catch (NumberFormatException e) {
+			//could not decrypt the number.  Maybe we are using the wrong key?
+			decryptionErrorFlag = true;
+        	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  Possible incorrect key.  "+e.getMessage());
+		}
+    	return defValue;
     }
 
     @Override
@@ -190,7 +222,14 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     	} catch (ClassCastException e) {
     		return delegate.getLong(key, defValue);
     	}
-        return v!=null ? Long.parseLong(decrypt(v)) : defValue;
+    	try {
+			return Long.parseLong(decrypt(v));
+		} catch (NumberFormatException e) {
+			//could not decrypt the number.  Maybe we are using the wrong key?
+			decryptionErrorFlag = true;
+        	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  Possible incorrect key.  "+e.getMessage());
+		}
+    	return defValue;
     }
 
     @Override
@@ -227,9 +266,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
             SecretKey key = keyFactory.generateSecret(new PBEKeySpec(SEKRIT));
             Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(),Settings.System.ANDROID_ID).getBytes(UTF8), 20));
+            pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).getBytes(UTF8), 20));
             return new String(Base64Support.encode(pbeCipher.doFinal(bytes), Base64Support.NO_WRAP),UTF8);
-
         } catch( Exception e ) {
             throw new RuntimeException(e);
         }
@@ -242,17 +280,11 @@ public class ObscuredSharedPreferences implements SharedPreferences {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
             SecretKey key = keyFactory.generateSecret(new PBEKeySpec(SEKRIT));
             Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(),Settings.System.ANDROID_ID).getBytes(UTF8), 20));
+            pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).getBytes(UTF8), 20));
             return new String(pbeCipher.doFinal(bytes),UTF8);
-
         } catch( Exception e) {
-        	Utils.LogD(this.getClass().getName(), "Warning, could not decrypt the value.  It may be stored in plaintext.  "+e.getMessage());
-//            throw new RuntimeException(e);
+        	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  It may be stored in plaintext.  "+e.getMessage());
         	return value;
         }
     }
-
-
-
-
 }
