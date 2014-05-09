@@ -48,7 +48,7 @@ import android.util.Log;
  * Usage:
  *
  * NetHandler.isNetworkConnected(context); //check if the network is ready to handle a request
- * netResult = NetHandler.handlePostWithRetry("url", params, NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
+ * NetResult netResult = NetHandler.handlePostWithRetry("url", params, NetHandler.NETWORK_DEFAULT_RETRY_ATTEMPTS);
  * @author sbossen
  *
  */

@@ -204,7 +204,8 @@ public class Utils {
         } catch (Exception e) {
             result.success = false;
             result.error = "Problem parsing website response: "+e;
-            Log.d("com.cxworx.Utils", "JSON Parsing error: "+e);
+            Log.e(Utils.class.getName(), "JSON Parsing error: "+e);
+            Utils.LogD(Utils.class.getName(), "Value to be converted was: "+string);
         }
         return result;
     }

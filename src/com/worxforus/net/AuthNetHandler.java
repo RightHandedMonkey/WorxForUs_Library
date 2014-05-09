@@ -1,9 +1,7 @@
 package com.worxforus.net;
 
 import java.util.List;
-
 import org.apache.http.NameValuePair;
-
 import com.worxforus.net.NetAuthentication.NetAuthenticationHelper;
 
 /**
@@ -13,6 +11,8 @@ import com.worxforus.net.NetAuthentication.NetAuthenticationHelper;
  * Usage:
  * Set the authentication object
  * AuthNetHelper.setAuthentication("host", subclassed NetAuthentication.NetAuthenticationHelper);
+ * Then load the authentication 
+ * NetAuthentication.loadUsernamePassword(username, passwd);
  * 
  * @author sbossen
  *
@@ -21,6 +21,11 @@ public class AuthNetHandler {
 	static String host;
 	static NetAuthenticationHelper authHelper;
 	
+	/*
+	 * Prepare the authentication system for usage.
+	 * This must be setup prior to using the post functions
+	 * Usage: AuthNetHandler.setAuthentication(url, new ConcreteAuthentication(context)); 
+	 */
 	public static void setAuthentication(String host, NetAuthenticationHelper authHelper) {
 		AuthNetHandler.host = host;
 		AuthNetHandler.authHelper = authHelper;
@@ -65,11 +70,16 @@ public class AuthNetHandler {
 			if (loginStatus == NetAuthentication.NOT_LOGGED_IN) {
 				//this means that the authenticate(..) function used a saved value, but server indicates user not logged in, so reset it.
 				NetAuthentication.invalidate();
-				loginStatus = handleLoginAttempt(); //AuthNetHandler.authHelper.checkForLoginError(netResult);
-				if (loginStatus == NetAuthentication.NO_ERRORS) { //we could now login, so retry
+				loginStatus = handleLoginAttempt(); 
+				if (loginStatus == NetAuthentication.NO_ERRORS) { 
+					//we could now login, so retry
 					netResult = NetHandler.handlePostWithRetry(url, params, num_retries);
 				} //else, we couldn't log in, so don't try to complete request - just pass previous netResult along
 			}
+		} else if (loginStatus == NetAuthentication.SERVER_ERROR) {
+			netResult.success = false;
+			netResult.message = "Network server error detected.";
+			netResult.technical_error = "Server did not return the expected JSON response. ";
 		}
 		return netResult;
 	}

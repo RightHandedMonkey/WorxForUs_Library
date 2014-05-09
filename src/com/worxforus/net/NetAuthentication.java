@@ -3,7 +3,7 @@ package com.worxforus.net;
 import com.worxforus.net.NetResult;
 
 /**
- * This class is used to contain the login credentials in memory and to handle actual responses to the network to/from login attempts
+ * This class is used to contain the login credentials in memory and to handle actual responses to the network login attempts.
  * 
  * Usage requires NetAuthentication.NetAuthenticationHelper to be subclassed
  * @author sbossen
@@ -171,6 +171,11 @@ public class NetAuthentication {
 	   }
    }
 
+   /**
+    * NetAuthenticationHelper defines the necessary functions needed for login handling.
+    * @author sbossen
+    *
+    */
    public interface NetAuthenticationHelper {
 	   /**
 	    * @return url of where to send login request
