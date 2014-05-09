@@ -93,6 +93,13 @@ public class NetResult extends com.worxforus.Result {
 		net_reset_client_connection = false;
 		closeNetResult();
 	}
+	
+	public String toString() {
+		String msg = "net_success: "+net_success+", net_error: "+net_error+", net_error_type: "
+				+net_error_type+", net_response_message: "+net_response_message;
+		msg += "\nParent: "+super.toString();
+		return msg;
+	}
 	//consider having an abstract class here if passing an entity object is not efficient
 	//public abstract NetResult handle_net_response(HttpResponse response) {}
 }
