@@ -23,4 +23,8 @@ public class SyncEntry {
 	public void setUploadDate(String uploadDate) {
 		this.uploadDate = uploadDate;
 	}
+	public void invalidate() {
+		this.uploadDate = "";
+		this.downloadDate = "";
+	}
 }

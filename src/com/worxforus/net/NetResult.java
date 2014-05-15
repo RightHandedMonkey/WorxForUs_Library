@@ -54,7 +54,7 @@ public class NetResult extends com.worxforus.Result {
 	 */
 	public int num_attemps=0;
 	//NOTE: Need to call close_net_result() in calling program.
-
+	
 	public NetResult closeNetResult() {
 		NetResult result = new NetResult();
 		//Check when using Apache HttpClient

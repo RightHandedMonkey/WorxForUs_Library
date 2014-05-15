@@ -32,5 +32,13 @@ public class JSONArrayWrapper {
 		}
 
     }
-	
+    
+    /**
+     * Returns the value at {@code index} if it exists and is an int or
+     * can be coerced to an int. Returns 0 otherwise.
+     */
+    public int optInt(int index) {
+        return arr.optInt(index, 0);
+    }
+
 }

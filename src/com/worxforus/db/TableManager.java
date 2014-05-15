@@ -62,7 +62,9 @@ public class TableManager {
 	}
 
 	/**
-	 * 
+	 * This function verifies that the table has been created and that the upgrade modifications have been performed on it
+	 * Then it locks the table for use
+	 * Use: releaseConnection(table) when finished performing operations on the table
 	 * @param appContext
 	 * @param dbName
 	 * @param table
@@ -78,16 +80,27 @@ public class TableManager {
 		return self().getConnectionHelper().acquire(table);
 	}
 	
+	/**
+	 * Call to declare you are done performing operations on a table
+	 * @param table
+	 */
 	public static void releaseConnection(TableInterface table) {
 		self().getConnectionHelper().release(table);
 	}
 	
+	/**
+	 * This functions checks to see if the table has been created and creates it if needed.
+	 * It performs the upgrade to tables as declared in the class file.
+	 * @param appContext
+	 * @param dbName
+	 * @param table
+	 */
 	private static synchronized void verifyTable(Context appContext, String dbName, TableInterface table) {
 		if (!checkIfTableExists(appContext, dbName, table.getTableName()) ) { //make sure table exists
 			//bypass acquireConnection and use direct call in case table is the tableVersionDb b/c we'd be stuck in a loop
 			Log.d(self().getClass().getName(), "Table: "+table.getTableName()+" was not found in db: "+dbName+"... creating table.");
 			self().getConnectionHelper().acquire(table);
-			table.createTable(); //create table if not
+			table.createTable(); //create table for the first time
 			self().getConnectionHelper().release(table);
 			//store table version in meta table
 			modifyTableVersion(appContext, dbName, table.getTableName(), table.getTableCodeVersion());
@@ -107,11 +120,6 @@ public class TableManager {
 		//mark as updated
 		table.setTableVerified();		
 	}
-	/*
-	public static TableInterface getTable() {
-		//TODO: Need to replace table pool with a version here that persists one copy of each table class used and returns that
-	}
-	*/
 	
 	//===========================--------------------> Verification Methods <-----------------====================\\
 	private static boolean checkIfTableExists(Context appContext, String dbName, String tableName) {

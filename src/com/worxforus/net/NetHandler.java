@@ -114,7 +114,7 @@ public class NetHandler {
 		int cur_try = 0;
 		while(cur_try < num_retries && result.net_success==false) {
 			cur_try++;
-			Log.d(NetHandler.class.getName(), "handle_post_with_retry, attempt# "+cur_try);
+			Utils.LogD(NetHandler.class.getName(), "handle_post_with_retry, attempt# "+cur_try);
 			NetHandler.handlePost(url, params, result);
 			//set num_attemps here
 			result.num_attemps = cur_try;
@@ -154,7 +154,7 @@ public class NetHandler {
 				debugOutput = params.toString();
 				debugOutput = debugOutput.substring(0, Math.min(debugOutput.length(), MAX_PARAMS_OUTPUT_DEBUG_LENGTH));
 			}
-			Log.d(NetHandler.class.getName(), "handle_page called for url: "+url);
+			Utils.LogD(NetHandler.class.getName(), "handle_page called for url: "+url);
 			if (debugOutput.length() > 0)
 				Utils.LogD(NetHandler.class.getName(), "params: "+debugOutput);
 			HttpResponse responsePOST = NetHandler.getHttpClient().execute(post);  
@@ -197,6 +197,7 @@ public class NetHandler {
 	 */
     public static HttpClient getHttpClient() {
     	if (client == null) {
+    		Utils.LogD(NetHandler.class.getName(), "Creating new HttpClient connection");
 	        HttpParams params = new BasicHttpParams();
 	
 	        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -293,11 +294,16 @@ public class NetHandler {
 		 } else { //failure could not get communications to server
 			result.success = false;
 			result.error = "Could not communicate with Web Server.";
-			Log.i(calling_class, "Attempted to communicate: "+result.num_attemps+" times, and connection was unsuccessful");
+			Log.w(calling_class, "Attempted to communicate: "+result.num_attemps+" times, and connection was unsuccessful");
 		 }
 		result.closeNetResult();
 		return result;
 		
+	}
+	
+	public static void reset() {
+		NetHandler.closeConnection();
+		NetHandler.client = null;
 	}
 
 }

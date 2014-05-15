@@ -61,8 +61,16 @@ public class Utils {
 	 * @param msg
 	 */
 	public static void LogD(String tag, String msg) {
-		if (BuildConfig.DEBUG)
+		if (isDebugBuild())
 			Log.d(tag, msg);
+	}
+	
+	/**
+	 * Checks to see if we are running a debug build.  Contained here in case we want to check a different way later
+	 * @return
+	 */
+	public static boolean isDebugBuild() {
+		return (BuildConfig.DEBUG);
 	}
 	
 	/**
@@ -71,7 +79,7 @@ public class Utils {
 	 */
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	public static void activateStrictMode() {
-		if (BuildConfig.DEBUG) { //only activate in the debug build
+		if (Utils.isDebugBuild()) { //only activate in the debug build
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
 	         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
 //             .detectDiskReads()
@@ -96,14 +104,7 @@ public class Utils {
 		b.detectLeakedClosableObjects();
 		return b;
 	}
-	
-//	public static void debug_toast(Activity app, boolean debug, String msg) {
-//		if (debug) {
-//			Toast toast = Toast.makeText(app.getApplicationContext(), msg,
-//					Toast.LENGTH_SHORT);
-//		}
-//	}
-	
+		
 	/**
 	 * Use this when you need to create a toast when you are not currently in the UI thread
 	 * @param c -application context or activity context
@@ -128,14 +129,6 @@ public class Utils {
 	 * @return
 	 */
 	public static String get_current_datetime_str() {
-		// Date d = new java.util.Date();
-
-		// DateFormat df = DateFormat.getTimeInstance();
-		// df.setTimeZone(TimeZone.getTimeZone("gmt"));
-
-		// return (new
-		// SimpleDateFormat(com.cxworx.Utils.MYSQL_DATETIME_FORMAT)).format(new
-		// java.util.Date());
 		DateFormat dateFormat = new SimpleDateFormat(
 				Utils.MYSQL_DATETIME_FORMAT);
 		// set to eastern time zone
@@ -187,8 +180,6 @@ public class Utils {
 		DateFormat dateFormat = new SimpleDateFormat(Utils.MYSQL_DATETIME_FORMAT);
 		// set to eastern time zone
 		dateFormat.setTimeZone(TimeZone.getTimeZone(MYSQL_TIMEZONE));
-		// return (new
-		// SimpleDateFormat(com.cxworx.Utils.MYSQL_DATETIME_FORMAT)).format(d);
 		return dateFormat.format(d);
 	}
 

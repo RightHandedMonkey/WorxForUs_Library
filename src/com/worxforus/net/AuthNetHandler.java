@@ -91,4 +91,18 @@ public class AuthNetHandler {
 		//for certain values, we don't even try to complete the request.
 		return loginStatus;
 	}
+	
+	/**
+	 * Resets the AuthNetHandler object in case you want to reload the authentication objects.
+	 * Useful if you change users and want to clear the authentication parameters
+	 * 
+	 * This clears the credential cache.  You should also consider clearing the login cache
+     * with NetAuthentication.reset();
+
+	 */
+	public static void reset() {
+		AuthNetHandler.host = null;
+		AuthNetHandler.authHelper = null;
+		NetHandler.reset();
+	}
 }

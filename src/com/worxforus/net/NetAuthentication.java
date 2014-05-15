@@ -1,5 +1,6 @@
 package com.worxforus.net;
 
+import com.worxforus.Utils;
 import com.worxforus.net.NetResult;
 
 /**
@@ -19,9 +20,10 @@ public class NetAuthentication {
 	private long lastLoginTime = 0; //stores last time we authenticated
 	private int usernum=-1;
 	
-	protected volatile int loginStatus = 0; //starts as false to indicate we haven't attempted the connection yet
+	protected volatile int loginStatus = NOT_SET; //starts as false to indicate we haven't attempted the connection yet
 	
 	public static final int NO_ERRORS = 0;
+	public static final int NOT_SET = -1; //login information has not been checked
 	public static final int LOGIN_FAILURE = 1; //login supplied but not valid
 	public static final int NETWORK_ERROR = 2; //could not communicate to server
 	public static final int SERVER_ERROR = 3; //server response could not be parsed
@@ -50,6 +52,21 @@ public class NetAuthentication {
 	   reset();
    }
 
+   public static String getLoginStatusMessage(String appName) {
+	   String message = "";
+		if (NetAuthentication.getInstance().loginStatus == NO_ERRORS) {
+			message ="Logged in to "+appName;
+		} else if(NetAuthentication.getInstance().loginStatus == LOGIN_FAILURE) {
+			message ="Could not login.  Check your login credential settings.";
+		} else if(NetAuthentication.getInstance().loginStatus == NETWORK_ERROR) {
+			message ="Could not connect to the network.  Connect to the Internet to login.";
+		} else if(NetAuthentication.getInstance().loginStatus == SERVER_ERROR) {
+			message =appName+" did not respond to the login.  Please try again later.";
+		}
+		
+		return message;
+   }
+   
    /**
     * Returns the results of whether the login was successful.
     * @return
@@ -76,7 +93,8 @@ public class NetAuthentication {
     * Use this function after calling loadUsername and loadPassword
     * Run inside a separate thread using Runnable or ASyncTask since the network calls may block for a while
     * 
-    * The NetHelper interface is used to attempt access multiple retries if needed 
+    * The NetHelper interface is used to attempt access multiple retries if needed.
+    * Use NetAuthentication.getLoginStatus() to verify success or failure information
     * @return NetResult - NetResult.success tells if the login worked or not
     */
    public static NetResult authenticate(String host, NetAuthenticationHelper authHelper) {
@@ -84,9 +102,10 @@ public class NetAuthentication {
 		   //check if current authentication is valid
 		   NetResult result = new NetResult();
 		   result.net_success = true;
-	
+		   Utils.LogD(NetAuthentication.class.getName(), "Checking user authentication...");
 		   if (NetAuthentication.isCurrentAuthenticationValid()) {
 			   authHelper.markAsLoginSuccessFromCache(result);
+			   Utils.LogD(NetAuthentication.class.getName(), "User authentication found in cache");
 			   return result; //don't sent to network - expect to be able to use the cookie.
 		   }
 		   
@@ -118,6 +137,7 @@ public class NetAuthentication {
 			   NetAuthentication.invalidate();
 			   result.success = false;
 		   }
+		   Utils.LogD(NetAuthentication.class.getName(), "User authentication was "+NetAuthentication.getInstance().getLoginStatusMessage("Server"));
 		   
 		   return result;
 	   }
@@ -144,9 +164,11 @@ public class NetAuthentication {
    
    /**
     * Call this function whenever the login information changes or login can be re-queried.
+    * This clears the login cache.  You should also consider clearing the credential cache
+    * with AuthNetHandler.reset();
     */
    public static void reset() {
-	   NetAuthentication.getInstance().loginStatus = 0;
+	   NetAuthentication.getInstance().loginStatus = NOT_SET;
 	   NetAuthentication.invalidate();
    }
 
