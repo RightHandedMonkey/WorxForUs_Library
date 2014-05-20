@@ -2,10 +2,13 @@ package com.worxforus.db;
 
 import com.worxforus.Result;
 import com.worxforus.SyncEntry;
+import com.worxforus.Utils;
 import com.worxforus.VersionEntry;
 
 import junit.framework.Assert;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 
@@ -37,7 +40,25 @@ public class TableManager {
 	private static TableManager self() {
 		return instance;
 	}
-
+	
+	/**
+	 * Check if the database exist
+	 * 
+	 * @return true if it exists, false if it doesn't
+	 */
+	public static boolean checkDatabaseExists(Context c, String dbName) {
+		String path = c.getDatabasePath(dbName).getAbsolutePath();
+	    SQLiteDatabase checkDB = null;
+	    try {
+	        checkDB = SQLiteDatabase.openDatabase(path, null,
+	                SQLiteDatabase.OPEN_READONLY);
+	        checkDB.close();
+	    } catch (SQLiteException e) {
+	        // database doesn't exist yet.
+	    }
+	    return checkDB != null ? true : false;
+	}
+	
 	private static ConnectionLimitHelper getConnectionHelper() {
 		if (self().connHelper == null) {
 			self().connHelper = ConnectionLimit.getConnectionHelper();
@@ -45,7 +66,7 @@ public class TableManager {
 		return self().connHelper;
 	}
 	
-	protected static TableVersionDb getTableVersionDB(Context appContext, String dbName) {
+	protected synchronized static TableVersionDb getTableVersionDB(Context appContext, String dbName) {
 		Assert.assertNotNull(appContext);
 		if (self().tableVersionDb == null) {
 			self().tableVersionDb = new TableVersionDb(appContext, dbName);
@@ -53,7 +74,7 @@ public class TableManager {
 		return self().tableVersionDb;
 	}
 	
-	protected static TableSyncDb getTableSyncDB(Context appContext, String dbName) {
+	protected synchronized static TableSyncDb getTableSyncDB(Context appContext, String dbName) {
 		Assert.assertNotNull(appContext);
 		if (self().tableSyncDb == null) {
 			self().tableSyncDb = new TableSyncDb(appContext, dbName);
@@ -189,6 +210,15 @@ public class TableManager {
 		r = syncTable.resetSyncData();
 		self().releaseConnection(syncTable);
 		return r;
+	}
+	
+	/**
+	 * Reset all the database connections
+	 */
+	public synchronized static void invalidate() {
+		Utils.LogD(TableManager.class.getName(), "Invalidating database connections");
+		self().tableVersionDb = null;
+		self().tableSyncDb = null;
 	}
 
 	

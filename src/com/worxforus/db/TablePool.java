@@ -38,7 +38,7 @@ public class TablePool {
 		return instance;
 	}
 	
-	public static <T> T getTable(Class<T> tableClass, Context c) {
+	public synchronized static <T> T getTable(Class<T> tableClass, Context c) {
 		if (self().tableMap.get(tableClass) == null) {
 			Utils.LogD(TablePool.class.getName(), "Creating table connection");
 
@@ -56,6 +56,16 @@ public class TablePool {
 			Utils.LogD(TablePool.class.getName(), "Reusing existing table connection");
 			return (T) self().tableMap.get(tableClass);
 		}
+	}
+	
+	/**
+	 * Reset all the database connections
+	 */
+	public synchronized static void invalidate() {
+		Utils.LogD(TablePool.class.getName(), "Invalidating database connections");
+		self().tableMap.clear();
+		self().tableVersionTable = null;
+		TableManager.invalidate();
 	}
 
 }

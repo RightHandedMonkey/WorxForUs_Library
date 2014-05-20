@@ -301,6 +301,9 @@ public class NetHandler {
 		
 	}
 	
+	/**
+	 * Closes the current connection so that the HttpClient will be regenerated on the next call
+	 */
 	public static void reset() {
 		NetHandler.closeConnection();
 		NetHandler.client = null;

@@ -95,6 +95,8 @@ public class NetAuthentication {
     * 
     * The NetHelper interface is used to attempt access multiple retries if needed.
     * Use NetAuthentication.getLoginStatus() to verify success or failure information
+    * 
+    * If successful, this function calls the NetAuthenticationHelper to persist the returned user number
     * @return NetResult - NetResult.success tells if the login worked or not
     */
    public static NetResult authenticate(String host, NetAuthenticationHelper authHelper) {
@@ -206,6 +208,7 @@ public class NetAuthentication {
 	   
 	   /**
 	    * Use this function to save a usernumber into the application.  Store in the preferences for example.
+	    * This is called on a successful call to NetAuthentication.authenticate(...)
 	    * @param result
 	    * @return
 	    */
