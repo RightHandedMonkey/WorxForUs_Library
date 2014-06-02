@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Worxforus library : Android networking and database library, which includes multiple retries for HTML access and serializes database access to prevent crashes.  " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Worxforus library</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/RightHandedMonkey/WorxForUs_Library">View on GitHub</a>
+
+          <h1 id="project_title">Worxforus library</h1>
+          <h2 id="project_tagline">Android networking and database library, which includes multiple retries for HTML access and serializes database access to prevent crashes.  </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/RightHandedMonkey/WorxForUs_Library/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/RightHandedMonkey/WorxForUs_Library/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="worxforus_library" class="anchor" href="#worxforus_library"><span class="octicon octicon-link"></span></a>WorxForUs_Library</h1>
+
+<p>This library is used by WorxForUs and can be found in products associated with the Android app for checkliststogo.com &amp; cxworx.com.</p>
+
+<h2>
+<a name="worxforus-android-framework-database-and-network-helper-tools" class="anchor" href="#worxforus-android-framework-database-and-network-helper-tools"><span class="octicon octicon-link"></span></a>
+WorxForUs Android Framework (Database and Network helper tools)</h2>
+
+<p><br>
+This article is an introductory guide to the Android helper library by WorxForUs.  The Android SDK has a lot of built in functionality, but there are certain things that it does not take care of for you.  The API guides only get you so far.  This framework is an attempt to pick up where the Android Samples leave off and address some of the trickier issues.  Hopefully you will find features in this library to help your code become more robust.<br><br>
+Major Features of the WorxForUs Android Library:<br></p>
+
+<ul>
+<li><a href="http://right-handed-monkey.blogspot.com/2014/03/android-database-example-and-tutorial.html" target="_blank">Database management (How To)</a></li>
+<ul>
+<li>Serialized access framework for writing thread safe (multi-threaded) applications</li>
+<li>Allows upgrade on a per table level instead of per database</li>
+<li>Supports methods to keep track of data synchronization to a remote server</li>
+</ul>
+<p></p>
+<li><a href="http://right-handed-monkey.blogspot.com/2014/04/android-networking-example-and-tutorial.html" target="_blank">Network Tools (How To)</a></li>
+
+<ul>
+<li>Allows easy detection and handling of network errors</li>
+<li>Built in support for cookies</li>
+<li>Allows easy use of network retry mode (ie. will attempt 5 times before returning an error)</li>
+<li>Deals with authenticated and non-authenticated network requests </li>
+</ul>
+<p></p>
+<li>
+<a href="http://right-handed-monkey.blogspot.com/2014/04/obscured-shared-preferences-for-android.html">Obscuring Shared Preferences Data (How To)</a> - com.worxforus.ObscuredSharedPreferences</li>
+
+<ul>
+<li>Shared data is normally stored in plaintext.  This tool easily encrypts your SharedPreferences data.</li>
+</ul>
+<p></p>
+<li>Object Pools - com.worxforus.Pool </li>
+
+<ul>
+<li>Put objects into a pool to keep memory usage low and minimize object creation</li>
+</ul>
+<p></p>
+</ul><h4>
+<a name="" class="anchor" href="#"><span class="octicon octicon-link"></span></a>
+ </h4>
+<h4>
+<a name="installation-" class="anchor" href="#installation-"><span class="octicon octicon-link"></span></a>
+Installation </h4>
+There are two ways to use the library.<br>
+1. Clone the source code at the github <a href="https://github.com/RightHandedMonkey/WorxForUs_Library">WorxForUs Library</a> and import into your IDE.  Link the WorxForUs Library project to your project.<br>
+2. Download the <a href="https://github.com/RightHandedMonkey/WorxForUs_Library/blob/master/bin/worxforuslibrary.jar">jar file </a>from github and include in your project/lib files.<br><br>
+If you are using the Network Tools, you may want to get the latest Apache HttpClient package from their download page <a href="http://hc.apache.org/downloads.cgi">here</a>.  You will want the httpcore-4.x.x.jar, httpclient-4.x.x.jar, httpclient-cache-4.x.x.jar, and httpmime-4.x.x.jar.  Import these into your referenced jar library.  The latest binary release as of this writing is the <a href="http://psg.mtu.edu/pub/apache//httpcomponents/httpclient/binary/httpcomponents-client-4.3.3-bin.zip">4.3.3 package</a>.<br><br><h4>
+<a name="why-was-this-framework-created" class="anchor" href="#why-was-this-framework-created"><span class="octicon octicon-link"></span></a>
+Why was this Framework created? </h4>
+<h4>
+<a name="-1" class="anchor" href="#-1"><span class="octicon octicon-link"></span></a>
+</h4>
+
+<p>Aside from the typical utilities one generally collects or creates when writing software for a long time, I had a few specific needs for robust database access and network handling.<br><br></p>
+
+<h4>
+<a name="database-management" class="anchor" href="#database-management"><span class="octicon octicon-link"></span></a>
+<a href="http://right-handed-monkey.blogspot.com/2014/03/android-database-example-and-tutorial.html" target="_blank">Database Management</a>
+</h4>
+
+<p>A typical example of using a SQLite database in Android shows that you extend the SQLiteOpenHelper.  This is good, but what if you have several tables each with their own version?  Also, the sample projects show doing a dbHelper.getWritableDatabase(), but do not say anything about how to handle multiple threads contending for the same resource.  This may work fine on single core CPU devices, but suddenly your app may crash on a multi-Core Nexus 7 because your database access is not serialized. This package use a Singleton to provide access to the SQLite database and Semaphores to provide the locking which by default serializes the database access and prevents many common database exceptions from occurring.<br><br></p>
+
+<h4>
+<a name="network-tools" class="anchor" href="#network-tools"><span class="octicon octicon-link"></span></a>
+Network Tools</h4>
+
+<p>I needed to handle cookies and detect when network connections were failing and identify what type of failure occurred.  Was the problem a server failure or a bad connection on the user device?  In a mobile network errors are the norm and it is important to handle them correctly.  I also wanted a way to easily retry a connection several times until it was successful.  This package is based on the Apache HttpClient because it easily supported the things I needed such as cookies and error detection.  Future versions are planned to use the Velocity framework. <br><br><br>*Additional Source of code, including but not limited to:<br>The Android Open Source Project - for the Base64Support code.<br>Obscuring Shared Preferences - much of the code for this came from help by emmby at <a href="http://stackoverflow.com/questions/785973/what-is-the-most-appropriate-way-to-store-user-settings-in-android-application/6393502#6393502"></a><a href="http://stackoverflow.com/questions/785973/what-is-the-most-appropriate-way-to-store-user-settings-in-android-application/6393502#6393502">http://stackoverflow.com/questions/785973/what-is-the-most-appropriate-way-to-store-user-settings-in-android-application/6393502#6393502</a><br> </p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Worxforus library maintained by <a href="https://github.com/RightHandedMonkey">RightHandedMonkey</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-51495566-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
