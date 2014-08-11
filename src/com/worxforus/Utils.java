@@ -1,5 +1,6 @@
 package com.worxforus;
 
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -7,17 +8,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.http.StatusLine;
-
 import com.worxforus.json.JSONObjectWrapper;
-
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -235,6 +229,25 @@ public class Utils {
             s = s.substring(1);
         }
         return s;
+    }
+    
+    /**
+     * Helper function to read an entire file from an input stream and get the raw string of data
+     * usage to get an Android resource:
+     * String data = Utils.readStreamAsString(getResources().openRawResource(R.raw.item));
+     * @param InputStream
+     * @return String - data read out
+     */
+    public static String readStreamAsString(InputStream in_s) {
+        try {
+            byte[] b = new byte[in_s.available()];
+            in_s.read(b);
+            return new String(b);
+        } catch (Exception e) {
+            // e.printStackTrace();
+        	Log.e(Utils.class.getName(), "Could not read input stream.");
+        }
+        return "";
     }
 
 }
