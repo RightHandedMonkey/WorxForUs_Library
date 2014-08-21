@@ -15,7 +15,6 @@ public interface Command {
 	public static final int STATE_FINISHED = 1;
 
 	//If the task.getState() > STATE_RUNNING then it can be safely removed, otherwise call abort and wait.
-
 	
 	//synchronized methods
 	public Result execute();

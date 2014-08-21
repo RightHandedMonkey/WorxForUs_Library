@@ -1,6 +1,7 @@
 package com.worxforus;
 
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,8 +9,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.StatusLine;
+
 import com.worxforus.json.JSONObjectWrapper;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -248,6 +252,31 @@ public class Utils {
         	Log.e(Utils.class.getName(), "Could not read input stream.");
         }
         return "";
+    }
+    
+    /**
+     * Code that replicates the behavior of php's sha1() function.
+     * thanks to: 11101101b [Ed]
+     * at: http://stackoverflow.com/questions/5711943/java-php-sha1-function
+     * @param s
+     * @return
+     */
+    public static String sha1(String s) {
+    	try{
+            return byteArray2Hex(MessageDigest.getInstance("SHA1").digest(s.getBytes("UTF-8")));
+    	} catch( Exception e) {
+    		throw new RuntimeException(e);
+    	}
+    }
+
+    private static final char[] hex = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    private static String byteArray2Hex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (final byte b : bytes) {
+            sb.append(hex[(b & 0xF0) >> 4]);
+            sb.append(hex[b & 0x0F]);
+        }
+        return sb.toString();
     }
 
 }

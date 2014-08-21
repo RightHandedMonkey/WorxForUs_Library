@@ -269,7 +269,7 @@ public class NetHandler {
 	/**
 	 * Used to parse JSON response from webserver in result.object
 	 * Handles exceptions by logging them
-	 * @param result - object containing net Entity object -> result.object is the JSON Object if successful
+	 * @param result - object containing net Entity object -> result.object is the JSON Object if successful sent as a JSONObjectWrapper class
 	 * @param calling_class - String to use to name calling function in log
 	 * @return
 	 */
@@ -285,6 +285,7 @@ public class NetHandler {
 	        		 result.object = (JSONObjectWrapper)response.object;
 			     }
 			} catch (IOException e) {
+				result.success = false;
 				result.error = "EntityUtils.toString threw - IOException Error: "+e.getMessage()+", Cause: "+e.getCause();
 				if (e.getMessage() == null) //different entry here for debugging purposes
 		    		Log.e(calling_class, result.error );
