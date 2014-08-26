@@ -159,7 +159,7 @@ public class NetAuthentication {
 						NetAuthentication.getInstance().password);
 			} else if (NetAuthentication.getInstance().accessToken.length() > 0
 					&& NetAuthentication.getInstance().uuid.length() > 0) {
-				result = authHelper.handleUsernameLogin(host, NetAuthentication.getInstance().accessToken,
+				result = authHelper.handleTokenLogin(host, NetAuthentication.getInstance().accessToken,
 						NetAuthentication.getInstance().uuid);
 			} else {
 				// error - no login credentials specified.
@@ -283,10 +283,7 @@ public class NetAuthentication {
 	 * @return
 	 */
 	public static boolean isReadyForLogin() {
-		if ((NetAuthentication.getInstance().username != null && NetAuthentication.getInstance().username.length() > 0)
-				|| (NetAuthentication.getInstance().accessToken != null
-						&& NetAuthentication.getInstance().accessToken.length() > 0 && NetAuthentication.getInstance().uuid
-						.length() > 0)) {
+		if (NetAuthentication.isTokenSet() || NetAuthentication.isUsernameSet()) {
 			return true;
 		} else {
 			return false;
