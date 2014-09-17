@@ -346,6 +346,14 @@ public class NetAuthentication {
 		public String getLoginErrorMessage();
 
 		/**
+		 * Checks if the system has detected a login failure.  This occurs only on a bad login attempt with invalid credentials provided.
+		 * This does not occur when the user is not logged in or the system is not available.
+		 * @param result
+		 * @return
+		 */
+		public boolean checkForLoginFailure(NetResult result);
+
+		/**
 		 * This function is called after a request for the login page to see if
 		 * a login error was created
 		 * 

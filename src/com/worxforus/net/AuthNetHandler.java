@@ -38,6 +38,15 @@ public class AuthNetHandler {
 	}
 	
 	/**
+	 * This function allows you to check if a login error was found after a call to requestLogin or
+	 * @param netResult
+	 * @return
+	 */
+	public static boolean checkLoginNetResultForFailure(NetResult netResult) {
+		return AuthNetHandler.authHelper.checkForLoginFailure(netResult);
+	}
+	
+	/**
 	 * Use this function when posts requires a login of some sort prior to accessing data.
 	 * First tries to login using cached values if possible,
 	 * Then it makes the network request, finally it
