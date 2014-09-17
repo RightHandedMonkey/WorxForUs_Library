@@ -148,17 +148,14 @@ public class NetAuthentication {
 			if (NetAuthentication.isCurrentAuthenticationValid()) {
 				authHelper.markAsLoginSuccessFromCache(result);
 				Utils.LogD(NetAuthentication.class.getName(), "User authentication found in cache");
-				return result; // don't sent to network - expect to be able to
-								// use the cookie.
+				return result; // don't sent to network - expect to be able to use the cookie.
 			}
 
 			// if username/password available use that
-			if (NetAuthentication.getInstance().username.length() > 0
-					&& NetAuthentication.getInstance().password.length() > 0) {
+			if (NetAuthentication.isUsernameSet()) {
 				result = authHelper.handleUsernameLogin(host, NetAuthentication.getInstance().username,
 						NetAuthentication.getInstance().password);
-			} else if (NetAuthentication.getInstance().accessToken.length() > 0
-					&& NetAuthentication.getInstance().uuid.length() > 0) {
+			} else if (NetAuthentication.isTokenSet()) {
 				result = authHelper.handleTokenLogin(host, NetAuthentication.getInstance().accessToken,
 						NetAuthentication.getInstance().uuid);
 			} else {
