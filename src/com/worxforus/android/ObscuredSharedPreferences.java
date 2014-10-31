@@ -40,6 +40,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     protected static final String UTF8 = "UTF-8";
     //this key is defined at runtime based on ANDROID_ID which is supposed to last the life of the device
     private static char[] SEKRIT=null; 
+    
+    private static char[] backup_secret=null;
 
 
     protected SharedPreferences delegate;
@@ -59,7 +61,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     public ObscuredSharedPreferences(Context context, SharedPreferences delegate) {
         this.delegate = delegate;
         this.context = context;
-        SEKRIT = Settings.Secure.ANDROID_ID.toCharArray();
+        //updated thanks to help from bkhall on github
+        SEKRIT = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID).toCharArray();
     }
     
     /**
@@ -258,7 +261,21 @@ public class ObscuredSharedPreferences implements SharedPreferences {
 		throw new RuntimeException("This class does not work with String Sets.");
 	}
 
-
+	/**
+	 * Push key allows you to hold the current key being used into a holding location so that it can be retrieved later
+	 * The use case is for when you need to load a new key, but still want to restore the old one.
+	 */
+	public void pushKey() {
+		backup_secret = SEKRIT;
+	}
+	
+	/**
+	 * This takes the key previously saved by pushKey() and activates it as the new decryption key
+	 */
+	public void popKey() {
+		SEKRIT = backup_secret;
+	}
+	
     protected String encrypt( String value ) {
 
         try {

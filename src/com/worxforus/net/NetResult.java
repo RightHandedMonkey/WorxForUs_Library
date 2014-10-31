@@ -3,6 +3,7 @@ package com.worxforus.net;
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
 
 import com.worxforus.Utils;
@@ -49,6 +50,17 @@ public class NetResult extends com.worxforus.Result {
 	 *     net_result.object will contain your JSON objects parsed for you
 	 */
 	public HttpEntity net_response_entity= null;
+	
+	/**
+	 * 
+	 * @return String - the resulting string from the host, with UTF BOM markers removed. 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	public String getCleanedUTF8ServerResponse() throws ParseException, IOException  {
+		return Utils.removeUTF8BOM(EntityUtils.toString(this.net_response_entity, Utils.CHARSET));
+	}
+	
 	/**
 	 * When set indicates how many times the system tried to retry the connection
 	 */
