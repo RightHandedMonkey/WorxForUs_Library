@@ -1,5 +1,6 @@
 package com.worxforus.android;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,9 +41,10 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     protected static final String UTF8 = "UTF-8";
     //this key is defined at runtime based on ANDROID_ID which is supposed to last the life of the device
     private static char[] SEKRIT=null; 
+    private static byte[] SALT=null;
     
     private static char[] backup_secret=null;
-
+    private static byte[] backup_salt=null;
 
     protected SharedPreferences delegate;
     protected Context context;
@@ -62,7 +64,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
         this.delegate = delegate;
         this.context = context;
         //updated thanks to help from bkhall on github
-        SEKRIT = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID).toCharArray();
+        ObscuredSharedPreferences.setNewKey(Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
+        ObscuredSharedPreferences.setNewSalt(Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
     }
     
     /**
@@ -72,6 +75,19 @@ public class ObscuredSharedPreferences implements SharedPreferences {
      */
     public static void setNewKey(String key) {
     	SEKRIT = key.toCharArray();
+    }
+    
+    /**
+     * Only used to change to a new salt during runtime.
+     * If you don't want to use the default per-device code for example
+     * @param salt - this must be a string in UT
+     */
+    public static void setNewSalt(String salt) {
+    	try {
+			SALT = salt.getBytes(UTF8);
+		} catch (UnsupportedEncodingException e) {
+	        throw new RuntimeException(e);
+		}
     }
 
     /**
@@ -167,7 +183,7 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     public Map<String, ?> getAll() {
         throw new UnsupportedOperationException(); // left as an exercise to the reader
     }
-
+    
     @Override
     public boolean getBoolean(String key, boolean defValue) {
     	//if these weren't encrypted, then it won't be a string
@@ -177,8 +193,24 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     	} catch (ClassCastException e) {
     		return delegate.getBoolean(key, defValue);
     	}
-    	
-        return v!=null ? Boolean.parseBoolean(decrypt(v)) : defValue;
+    	//Boolean string values should be 'true' or 'false'
+    	//Boolean.parseBoolean does not throw a format exception, so check manually
+    	String parsed = decrypt(v);
+    	if (!checkBooleanString(parsed) ) {
+    		//could not decrypt the Boolean.  Maybe the wrong key was used.
+			decryptionErrorFlag = true;
+        	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  Possible incorrect key used.");
+    	}
+        return v!=null ? Boolean.parseBoolean(parsed) : defValue;
+    }
+
+    /**
+     * This function checks if a valid string is received on a request for a Boolean object
+     * @param str
+     * @return
+     */
+    private boolean checkBooleanString(String str) {
+    	return ("true".equalsIgnoreCase(str) || "false".equalsIgnoreCase(str)); 
     }
 
     @Override
@@ -265,15 +297,30 @@ public class ObscuredSharedPreferences implements SharedPreferences {
 	 * Push key allows you to hold the current key being used into a holding location so that it can be retrieved later
 	 * The use case is for when you need to load a new key, but still want to restore the old one.
 	 */
-	public void pushKey() {
+	public static void pushKey() {
 		backup_secret = SEKRIT;
 	}
 	
 	/**
-	 * This takes the key previously saved by pushKey() and activates it as the new decryption key
+	 * This takes the key previously saved by pushKey() and activates it as the current decryption key
 	 */
-	public void popKey() {
+	public static void popKey() {
 		SEKRIT = backup_secret;
+	}
+	
+	/**
+	 * pushSalt() allows you to hold the current salt being used into a holding location so that it can be retrieved later
+	 * The use case is for when you need to load a new salt, but still want to restore the old one.
+	 */
+	public static void pushSalt() {
+		backup_salt = SALT;
+	}
+	
+	/**
+	 * This takes the value previously saved by pushSalt() and activates it as the current salt
+	 */
+	public static void popSalt() {
+		SALT = backup_salt;
 	}
 	
     protected String encrypt( String value ) {
@@ -283,7 +330,7 @@ public class ObscuredSharedPreferences implements SharedPreferences {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
             SecretKey key = keyFactory.generateSecret(new PBEKeySpec(SEKRIT));
             Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).getBytes(UTF8), 20));
+            pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
             return new String(Base64Support.encode(pbeCipher.doFinal(bytes), Base64Support.NO_WRAP),UTF8);
         } catch( Exception e ) {
             throw new RuntimeException(e);
@@ -297,7 +344,7 @@ public class ObscuredSharedPreferences implements SharedPreferences {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
             SecretKey key = keyFactory.generateSecret(new PBEKeySpec(SEKRIT));
             Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(Settings.Secure.getString(context.getContentResolver(), Secure.ANDROID_ID).getBytes(UTF8), 20));
+            pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
             return new String(pbeCipher.doFinal(bytes),UTF8);
         } catch( Exception e) {
         	Log.e(this.getClass().getName(), "Warning, could not decrypt the value.  It may be stored in plaintext.  "+e.getMessage());
