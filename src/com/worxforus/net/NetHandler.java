@@ -11,7 +11,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerPNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -126,7 +129,8 @@ public class NetHandler {
 	}
 		
 	/**
-	 * Makes a single post to a url but does not attempt to retry the connection.
+	 * Makes a single HTTP POST to a url but does not attempt to retry the connection.
+	 * If no params are sent, then HTTP GET is used.
 	 * Result.net_success will equal false or true when successful.
 	 *
 	 * if there is a network error:
@@ -142,21 +146,27 @@ public class NetHandler {
 		//first make sure we haven't marked as passed
 		result.clearNetResults();
 		try {
-			HttpPost post = new HttpPost(url);
 			String debugOutput = "";
+			HttpResponse response;  
 			if (params != null) {
+				HttpPost post = new HttpPost(url);
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);
 				post.setEntity(ent);
 				debugOutput = params.toString();
 				debugOutput = debugOutput.substring(0, Math.min(debugOutput.length(), MAX_PARAMS_OUTPUT_DEBUG_LENGTH));
+				response = NetHandler.getHttpClient().execute(post);  
+			} else {
+				HttpGet get = new HttpGet(url);
+				response = NetHandler.getHttpClient().execute(get);  
 			}
+			//Log data if debug mode is enabled
 			Utils.LogD(NetHandler.class.getName(), "handle_page called for url: "+url);
 			if (debugOutput.length() > 0)
 				Utils.LogD(NetHandler.class.getName(), "params: "+debugOutput);
-			HttpResponse responsePOST = NetHandler.getHttpClient().execute(post);  
-			result.net_response_entity = responsePOST.getEntity();
-			result.net_response_message = responsePOST.getStatusLine().toString();
-			result.net_response_code = responsePOST.getStatusLine().getStatusCode();
+
+			result.net_response_entity = response.getEntity();
+			result.net_response_message = response.getStatusLine().toString();
+			result.net_response_code = response.getStatusLine().getStatusCode();
 			if (result.net_response_code == HTTP_STATUS_OK) {
 				result.net_success = true;
 			}
