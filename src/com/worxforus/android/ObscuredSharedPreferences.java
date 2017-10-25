@@ -48,7 +48,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
 
     protected SharedPreferences delegate;
     protected Context context;
-
+    private static ObscuredSharedPreferences prefs = null;
+    
     //Set to true if a decryption error was detected
     //in the case of float, int, and long we can tell if there was a parse error
     //this does not detect an error in strings or boolean - that requires more sophisticated checks
@@ -90,18 +91,20 @@ public class ObscuredSharedPreferences implements SharedPreferences {
     }
 
     /**
-     * Accessor to grab the preferences object
-     * To improve performance for multiple accesses, please store the returned object in a variable for reuse
+     * Accessor to grab the preferences in a singleton.  This stores the reference in a singleton so it can be accessed repeatedly with 
+     * no performance penalty
      * @param c - the context used to access the preferences.
-     * @param domainName - domain the shared preferences should be stored under
+     * @param appName - domain the shared preferences should be stored under
      * @param contextMode - Typically Context.MODE_PRIVATE
      * @return
      */
-    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String domainName, int contextMode) {
-        //make sure to use application context since preferences live outside an Activity
-        //use for objects that have global scope like: prefs or starting services
-        ObscuredSharedPreferences prefs = new ObscuredSharedPreferences(
-             c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(domainName, contextMode) );
+    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String appName, int contextMode) {
+    	if (prefs == null) {
+    		//make sure to use application context since preferences live outside an Activity
+    		//use for objects that have global scope like: prefs or starting services
+	    		prefs = new ObscuredSharedPreferences( 
+	       			 c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(appName, contextMode) );
+    	}
     	return prefs;
     }
     
