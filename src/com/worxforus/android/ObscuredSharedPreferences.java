@@ -48,8 +48,8 @@ public class ObscuredSharedPreferences implements SharedPreferences {
 
     protected SharedPreferences delegate;
     protected Context context;
-    private static ObscuredSharedPreferences prefs = null;
-    
+    private static java.util.HashMap<String, ObscuredSharedPreferences> prefs = new java.util.HashMap<String, ObscuredSharedPreferences>();
+
     //Set to true if a decryption error was detected
     //in the case of float, int, and long we can tell if there was a parse error
     //this does not detect an error in strings or boolean - that requires more sophisticated checks
@@ -94,20 +94,21 @@ public class ObscuredSharedPreferences implements SharedPreferences {
      * Accessor to grab the preferences in a singleton.  This stores the reference in a singleton so it can be accessed repeatedly with 
      * no performance penalty
      * @param c - the context used to access the preferences.
-     * @param appName - domain the shared preferences should be stored under
+     * @param name - domain the shared preferences should be stored under
      * @param contextMode - Typically Context.MODE_PRIVATE
      * @return
      */
-    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String appName, int contextMode) {
-    	if (prefs == null) {
-    		//make sure to use application context since preferences live outside an Activity
-    		//use for objects that have global scope like: prefs or starting services
-	    		prefs = new ObscuredSharedPreferences( 
-	       			 c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(appName, contextMode) );
-    	}
-    	return prefs;
+    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String name, int contextMode) {
+        if (!prefs.containsKey(name) || prefs.get(name) == null) {
+            //make sure to use application context since preferences live outside an Activity
+            //use for objects that have global scope like: prefs or starting services
+            prefs.put(name, new ObscuredSharedPreferences(
+                            c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(name, contextMode) )
+            );
+        }
+        return prefs.get(name);
     }
-    
+
     public class Editor implements SharedPreferences.Editor {
         protected SharedPreferences.Editor delegate;
 
