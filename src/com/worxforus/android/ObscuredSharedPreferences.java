@@ -94,19 +94,19 @@ public class ObscuredSharedPreferences implements SharedPreferences {
      * Accessor to grab the preferences in a singleton.  This stores the reference in a singleton so it can be accessed repeatedly with 
      * no performance penalty
      * @param c - the context used to access the preferences.
-     * @param name - domain the shared preferences should be stored under
+     * @param domain - domain the shared preferences should be stored under
      * @param contextMode - Typically Context.MODE_PRIVATE
      * @return
      */
-    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String name, int contextMode) {
-        if (!prefs.containsKey(name) || prefs.get(name) == null) {
+    public synchronized static ObscuredSharedPreferences getPrefs(Context c, String domain, int contextMode) {
+        if (!prefs.containsKey(domain) || prefs.get(domain) == null) {
             //make sure to use application context since preferences live outside an Activity
             //use for objects that have global scope like: prefs or starting services
-            prefs.put(name, new ObscuredSharedPreferences(
-                            c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(name, contextMode) )
+            prefs.put(domain, new ObscuredSharedPreferences(
+                            c.getApplicationContext(), c.getApplicationContext().getSharedPreferences(domain, contextMode) )
             );
         }
-        return prefs.get(name);
+        return prefs.get(domain);
     }
 
     public class Editor implements SharedPreferences.Editor {
